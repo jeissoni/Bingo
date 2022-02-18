@@ -9,14 +9,57 @@ import "./token/IERC20.sol";
 
 contract Bingo {
 
+    IERC20 public USD;
+
+    using Counters for Counters.Counter;
+
+    enum statePlay{
+        CREATED,
+        INITIATED,
+        FINALIZED
+    }
+
+    enum words{
+        B,I,N,G,O
+    }
+
+    struct playDetail{
+        uint256 idPlay;
+        uint256 maxNumberCartons;
+        uint256 numberPlayer;
+        uint256 cartonsByPlayer;
+        uint256 catonPrice;
+        uint256 startPlayDate;
+        uint256 endPlayDate;
+        uint256[] carton;
+        statePlay state;
+        mapping(words => uint[4]) winerNumber;
+    }
+
+
+    struct cartonsDetail{
+        uint256 idCarton;
+        uint256 idPlay;
+        mapping(words => uint[4]) number;
+    }
   
-    mapping(uint256 => structBingo.playDetail) play;   
+    Counters.Counter private currentIdPlay;
+    Counters.Counter private currentIdCartons;
 
-    mapping(uint256 => structBingo.cartonsDetail) cartons;
+    mapping(uint256 => playDetail) private play;   
 
-    mapping(address => uint256[]) userPlay;
+    mapping(uint256 => cartonsDetail) private cartons;
 
-    mapping(address => uint256[]) userCartons;
+    mapping(address => uint256[]) public userPlay;
+
+    mapping(address => uint256[]) private userCartons;
+
+    mapping(address => bool) private owner;
+
+
+    //events
+
+
 
     mapping(address => bool) owner;
 
