@@ -60,6 +60,14 @@ contract Bingo {
     //events
 
 
+    //modifier
+    modifier onlyOwner() {
+        require(
+            owner[msg.sender] == true,
+            "Exclusive function of the Owner"
+        );
+        _;
+    }
 
     mapping(address => bool) owner;
 
