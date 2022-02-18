@@ -70,19 +70,64 @@ contract Bingo {
     }
 
     mapping(address => bool) owner;
+    function _createPlay(
+        //uint256 _idPlay,
+        uint256 _maxNumberCartons,
+        uint256 _numberPlayer,
+        uint256 _cartonsByPlayer,
+        uint256 _cartonPrice,
+        //uint256 _startDate,
+        uint256 _endDate,
+        statePlay _state
+    ) onlyOwner private returns(bool){
+
+        require(block.timestamp > _endDate,"The game end date must be greater than the current date");
+
+        require(_cartonPrice > 0 ,"The price of the carton must be greater than zero");
+
+        require(
+            USD.balanceOf(msg.sender) >= _cartonPrice,
+            "Do not have the necessary funds of USD"
+        );  
+
+        uint256 _idPlay = currentIdPlay.current();           
+
+        play[_idPlay].maxNumberCartons = _maxNumberCartons;
+        play[_idPlay].numberPlayer = _numberPlayer;
+        play[_idPlay].cartonsByPlayer = _cartonsByPlayer;
+        play[_idPlay].catonPrice = _cartonPrice;
+        play[_idPlay].startPlayDate = block.timestamp;
+        play[_idPlay].endPlayDate = _endDate;
+        play[_idPlay].state = _state;
+
+        currentIdPlay.increment();
+
+    }
 
 
     function createPlay(
-        uint256 _idPlay,
+        //uint256 _idPlay,
         uint256 _maxNumberCartons,
         uint256 _numberPlayer,
         uint256 _cartonsByPlayer,
         uint256 _totalPrize,
-        uint256 _startDate,
-        uint256 _endDate,
-        structBingo.statePlay _state
-    ) external view returns(bool){
-        bool result = ownerFunction._createPlay(_idPlay, _maxNumberCartons, _numberPlayer, _cartonsByPlayer, _totalPrize, _startDate, _endDate, _state);
+        //uint256 _startDate,
+        uint256 _endDate
+        //structBingo.statePlay _state
+    )  external returns(bool){
+        
+      
+
+        bool result = _createPlay(            
+            _maxNumberCartons,
+            _numberPlayer, 
+            _cartonsByPlayer, 
+            _totalPrize,              
+            _endDate, 
+            statePlay.CREATED
+            );
+
+        
     }
 
 }
