@@ -105,29 +105,6 @@ contract Bingo {
     }
 
 
-    function createPlay(
-        //uint256 _idPlay,
-        uint256 _maxNumberCartons,
-        uint256 _numberPlayer,
-        uint256 _cartonsByPlayer,
-        uint256 _totalPrize,
-        //uint256 _startDate,
-        uint256 _endDate
-        //structBingo.statePlay _state
-    )  external returns(bool){
-        
-      
-
-        bool result = _createPlay(            
-            _maxNumberCartons,
-            _numberPlayer, 
-            _cartonsByPlayer, 
-            _totalPrize,              
-            _endDate, 
-            statePlay.CREATED
-            );
-
-        
     }
 
 }
