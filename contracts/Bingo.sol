@@ -69,19 +69,22 @@ contract Bingo {
         _;
     }
 
-    mapping(address => bool) owner;
-    function _createPlay(
+    function isOwner(address _account) external view returns (bool){
+        return owner[_account];
+    }
+
+    function createPlay(
         //uint256 _idPlay,
         uint256 _maxNumberCartons,
         uint256 _numberPlayer,
         uint256 _cartonsByPlayer,
         uint256 _cartonPrice,
         //uint256 _startDate,
-        uint256 _endDate,
-        statePlay _state
-    ) onlyOwner private returns(bool){
+        uint256 _endDate
+        //statePlay _state
+    ) onlyOwner external returns(bool){
 
-        require(block.timestamp > _endDate,"The game end date must be greater than the current date");
+        require(block.timestamp < _endDate,"The game end date must be greater than the current date");
 
         require(_cartonPrice > 0 ,"The price of the carton must be greater than zero");
 
