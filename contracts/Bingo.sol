@@ -104,6 +104,15 @@ contract Bingo {
     }
 
 
+ 
+
+    constructor(address usd){
+
+        owner[msg.sender] = true;
+
+        USD = IERC20(usd);
+
+
     }
 
 }
