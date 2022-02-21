@@ -98,8 +98,11 @@ contract Bingo {
         play[_idPlay].catonPrice = _cartonPrice;
         play[_idPlay].startPlayDate = block.timestamp;
         play[_idPlay].endPlayDate = _endDate;
+        play[_idPlay].state = statePlay.CREATED;
 
         currentIdPlay.increment();
+
+        return true;
 
     }
 
