@@ -97,6 +97,17 @@ describe("Test smart contract Bingo.sol", function () {
         cartonPrice,
         endDate
       )
+
+      const currentIdPlay : BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+      const getLastPlay = await BingoDeploy.getPlayDetail(currentIdPlay.sub(1))
+
+      expect(getLastPlay.maxNumberCartons).to.equals(maxNumberCartons)
+      expect(getLastPlay.numberPlayer).to.equals(numberPlayer)
+      expect(getLastPlay.cartonsByPlayer).to.equals(cartonsByPlayer)
+      expect(getLastPlay.catonPrice).to.equals(cartonPrice)
+      expect(getLastPlay.endPlayDate).to.equals(endDate)
+
     })
 
   })
