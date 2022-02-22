@@ -5,7 +5,7 @@ import "./struct/strucs.sol";
 import "./utils/Counters.sol";
 import "./token/IERC20.sol";
 
- 
+import "./RandomNumberConsumer.sol";
 
 contract Bingo {
 
@@ -31,9 +31,9 @@ contract Bingo {
         uint256 catonPrice;
         uint256 startPlayDate;
         uint256 endPlayDate;
-        uint256[] carton;
+        //uint256[] carton;
         statePlay state;
-        mapping(words => uint[4]) winerNumber;
+        //mapping(words => uint[4]) winerNumber;
     }
 
 
@@ -42,11 +42,17 @@ contract Bingo {
         uint256 idPlay;
         mapping(words => uint[4]) number;
     }
+
   
     Counters.Counter private currentIdPlay;
     Counters.Counter private currentIdCartons;
 
+
     mapping(uint256 => playDetail) private play;   
+    mapping(uint256 => uint256[]) private PlayCartons;
+    mapping(uint256 => uint256[]) private playCartonWins;
+
+    
 
     mapping(uint256 => cartonsDetail) private cartons;
 
@@ -73,25 +79,27 @@ contract Bingo {
         return owner[_account];
     }
 
+
+    function getCurrentIdPLay() external view returns (uint256){
+        return currentIdPlay.current();   
+    }
+
+
+    function getPlayDetail(uint256 _idPLay) external view returns(playDetail memory){
+        return play[_idPLay];
+    }
+
     function createPlay(
-        //uint256 _idPlay,
         uint256 _maxNumberCartons,
         uint256 _numberPlayer,
         uint256 _cartonsByPlayer,
         uint256 _cartonPrice,
-        //uint256 _startDate,
         uint256 _endDate
-        //statePlay _state
     ) onlyOwner external returns(bool){
 
         require(block.timestamp < _endDate,"The game end date must be greater than the current date");
 
-        require(_cartonPrice > 0 ,"The price of the carton must be greater than zero");
-
-        require(
-            USD.balanceOf(msg.sender) >= _cartonPrice,
-            "Do not have the necessary funds of USD"
-        );  
+        require(_cartonPrice > 0 ,"The price of the carton must be greater than zero");     
 
         uint256 _idPlay = currentIdPlay.current();           
 
