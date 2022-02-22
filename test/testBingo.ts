@@ -1,6 +1,7 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import { BigNumber } from "ethers"
+import { Provider } from "@ethersproject/abstract-provider";
 
 
 const duration = {
@@ -33,7 +34,11 @@ describe("Test smart contract Bingo.sol", function () {
     const decimals = 8
     const totalValue = BigNumber.from(100).mul(10).pow(8)
 
-    const [ownerBingo, owenrERC20, user1, user2, user3, user4] = await ethers.getSigners();
+    const [ownerBingo, owenrERC20, user1, user2, user3, user4] = await ethers.getSigners()
+
+    const account1 = await ethers.getSigner("0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a")
+
+    const linkAddress : string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
 
     const ERC20 = await ethers.getContractFactory("ERC20")
 
@@ -42,7 +47,7 @@ describe("Test smart contract Bingo.sol", function () {
       nameERC20,
       symbolERC20,
       decimals,
-      totalValue
+      totalValue      
     )
 
    
@@ -56,7 +61,9 @@ describe("Test smart contract Bingo.sol", function () {
       owenrERC20,
       user1, user2, user3, user4,
       ERC20Deploy,
-      BingoDeploy
+      BingoDeploy,
+      account1,
+      linkAddress
     }
     
  
@@ -76,7 +83,13 @@ describe("Test smart contract Bingo.sol", function () {
 
     it ("Create new Play", async()=>{
 
-      const {ownerBingo, BingoDeploy} = await BingoData()
+
+
+      const {ownerBingo, BingoDeploy, account1} = await BingoData()
+
+      const balnace : BigNumber = await ethers.provider.getBalance(account1.address)
+
+      console.log(balnace.toString())
 
       const lastBlockDate : BigNumber = await latest()
 
