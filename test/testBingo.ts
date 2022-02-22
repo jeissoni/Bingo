@@ -88,8 +88,6 @@ describe("Test smart contract Bingo.sol", function () {
 
       const endDate : BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
 
-      console.log(endDate.toString())
-
       await BingoDeploy.connect(ownerBingo).createPlay(
         maxNumberCartons,
         numberPlayer,
