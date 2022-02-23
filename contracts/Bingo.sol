@@ -99,6 +99,25 @@ contract Bingo {
     function getRamdonNumber() external view returns(uint256){
         return Ramdom.s_requestId();
     }
+
+    function isUserOwnerPlay(address _account, uint256 _idPlay) 
+    internal 
+    view 
+    returns (bool){
+
+        bool playReturn = false;
+        if (userOwnerPlay[_account].length > 0) {
+            for (uint256 i = 0; i < userOwnerPlay[_account].length; i++) {
+               if (userOwnerPlay[_account][i] == _idPlay){
+                   playReturn = true;
+               }
+            }
+        }
+        return playReturn;
+    }
+
+    
+
     function createPlay(
         uint256 _maxNumberCartons,
         uint256 _numberPlayer,
