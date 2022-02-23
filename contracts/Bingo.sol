@@ -96,6 +96,9 @@ contract Bingo {
         return play[_idPLay];
     }
 
+    function getRamdonNumber() external view returns(uint256){
+        return Ramdom.s_requestId();
+    }
     function createPlay(
         uint256 _maxNumberCartons,
         uint256 _numberPlayer,
