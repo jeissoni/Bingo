@@ -10,6 +10,7 @@ import "./RandomNumberConsumer.sol";
 contract Bingo {
 
     IERC20 public USD;
+    RandomNumberConsumer public Ramdom;
 
     using Counters for Counters.Counter;
 
