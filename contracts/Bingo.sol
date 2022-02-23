@@ -34,6 +34,7 @@ contract Bingo {
         uint256 endPlayDate;
         //uint256[] carton;
         statePlay state;
+        address ownerPlay;
         //mapping(words => uint[4]) winerNumber;
     }
 
@@ -41,7 +42,7 @@ contract Bingo {
     struct cartonsDetail{
         uint256 idCarton;
         uint256 idPlay;
-        mapping(words => uint[4]) number;
+        mapping(words => uint256[]) number;
     }
 
   
@@ -52,6 +53,7 @@ contract Bingo {
     mapping(uint256 => playDetail) private play;   
     mapping(uint256 => uint256[]) private PlayCartons;
     mapping(uint256 => uint256[]) private playCartonWins;
+    mapping(address => uint256[]) private userOwnerPlay;
 
     
 
@@ -62,6 +64,10 @@ contract Bingo {
     mapping(address => uint256[]) private userCartons;
 
     mapping(address => bool) private owner;
+
+    mapping(uint256 => bool) private numberExists;
+
+
 
 
     //events
