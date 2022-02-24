@@ -7,6 +7,9 @@ import "./token/IERC20.sol";
 
 import "./RandomNumberConsumer.sol";
 
+import "hardhat/console.sol";
+
+
 contract Bingo {
 
     IERC20 public USD;
@@ -80,9 +83,6 @@ contract Bingo {
         );
         _;
     }
-
-   
-
     function isOwner(address _account) external view returns (bool){
         return owner[_account];
     }
@@ -170,6 +170,7 @@ contract Bingo {
 
         currentIdPlay.increment();
 
+        emit CreateNewPlay(msg.sender, _idPlay);
         return true;
 
     }
