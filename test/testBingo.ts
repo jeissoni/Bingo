@@ -121,6 +121,73 @@ describe("Test smart contract Bingo.sol", function () {
 
     })
 
+    it("Create all number of Bingo" , async () => {
+
+      const {ownerBingo, BingoDeploy} = await BingoData()
+
+      await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+
+      for (var i = 0 ; i < 5 ; i++){
+
+        const numberOfWord = await BingoDeploy.connect(ownerBingo).getNumberOfWord(i)
+        
+        for (var j = 0 ; j < 15 ; j++){
+         
+          let numero : number = j + 1
+
+          if (i === 0){
+            expect(numberOfWord[j]).to.equals(BigNumber.from(numero))
+          }
+          if (i === 1){
+            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 15))
+          }
+          if (i === 2){
+            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 30))
+          }
+          if (i === 3){
+            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 45))
+          }
+          if (i === 4){
+            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 60))
+          }         
+           
+        }
+      }      
+
+    })
+
+    it("Create play cartons" , async () => {
+
+      const {ownerBingo, BingoDeploy, user1} = await BingoData()
+
+      //create new play
+      const lastBlockDate : BigNumber = await latest()
+      const maxNumberCartons : number = 20
+      const numberPlayer : number = 20
+      const cartonsByPlayer : number = 1  
+      const cartonPrice : BigNumber = BigNumber.from(1).mul(10).pow(8)
+      const endDate : BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
+      await BingoDeploy.connect(user1).createPlay(
+        maxNumberCartons,
+        numberPlayer,
+        cartonsByPlayer,
+        cartonPrice,
+        endDate
+      )
+
+      const currentIdPlay : BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+      await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+      //create all cartons
+      await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))     
+
+      const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
+
+      expect(maxNumberCartons).to.equals(cartonsCreated.length)
+
+  })
+
   })
 
 })
