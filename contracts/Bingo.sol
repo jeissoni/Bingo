@@ -92,6 +92,10 @@ contract Bingo {
         return currentIdPlay.current();   
     }
 
+    function getCurrentIdCartons() external view returns(uint256){
+        return currentIdCartons.current();
+    }
+
 
     function getPlayDetail(uint256 _idPLay) external view returns(playDetail memory){
         return play[_idPLay];
