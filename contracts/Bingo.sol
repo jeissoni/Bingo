@@ -69,6 +69,7 @@ contract Bingo {
     mapping(words => uint256[]) private numbersOfBingo;
 
     //events
+    event CreateNewPlay(address owner, uint256 idPlay);
 
 
     //modifier
