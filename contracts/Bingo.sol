@@ -174,20 +174,22 @@ contract Bingo {
 
     }
 
-    function generateNumberRamdom(uint256 _min, uint256 _max) internal view returns(uint256){
+    function generateNumberRamdom(uint256 _min, uint256 _max, uint256 _seed) internal view returns(uint256){
 
-        uint256 seed = Ramdom.s_requestId();
+        //uint256 seed = Ramdom.s_requestId();
         
         return uint256 (
-            keccak256(abi.encodePacked(block.timestamp, msg.sender, seed ))
+            keccak256(abi.encodePacked(block.timestamp, msg.sender, _seed ))
             ) % (_max - _min + 1) + 1 ;       
 
     }
 
 
-    function createNewCartons(uint256 _idPlay) internal returns (bool){
-
+    function createNewCartons(uint256 _idPlay) external returns(bool){
         require(isUserOwnerPlay(msg.sender, _idPlay),"you do not have permissions to create cards");
+        require(_createNewCartons(_idPlay),"Could not create game cards");
+        return true;
+    }
         
         //crear nueva semilla 
 
