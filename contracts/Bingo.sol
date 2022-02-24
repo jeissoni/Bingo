@@ -65,6 +65,8 @@ contract Bingo {
 
     mapping(address => bool) private owner;
 
+    //numeros posibles del bingo
+    mapping(words => uint256[]) private numbersOfBingo;
 
     //events
 
