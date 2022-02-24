@@ -65,10 +65,6 @@ contract Bingo {
 
     mapping(address => bool) private owner;
 
-    mapping(uint256 => bool) private numberExists;
-
-
-
 
     //events
 
