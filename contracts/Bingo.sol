@@ -105,6 +105,26 @@ contract Bingo {
         return Ramdom.s_requestId();
     }
 
+    function createAllNumberOfBingo() external onlyOwner returns(bool){
+        for (uint i = 1 ; i <= 15 ; i++ ){
+            numbersOfBingo[words.B].push(i);
+            numbersOfBingo[words.I].push(i + 15);
+            numbersOfBingo[words.N].push(i + 30);
+            numbersOfBingo[words.G].push(i + 45);
+            numbersOfBingo[words.O].push(i + 60);
+        }
+        return true;
+    }
+
+    function getNumberOfWord(words _word) external view returns(uint256[] memory){
+        return numbersOfBingo[_word];
+    }
+
+    function getIdCartonsPlay(uint256 _idPlay) external view returns(uint256[] memory){
+        return PlayCartons[_idPlay];
+    }
+
+
     function isUserOwnerPlay(address _account, uint256 _idPlay) 
     internal 
     view 
