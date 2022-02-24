@@ -190,9 +190,14 @@ contract Bingo {
         require(_createNewCartons(_idPlay),"Could not create game cards");
         return true;
     }
-        
-        //crear nueva semilla 
 
+    function _createNewCartons(uint256 _idPlay) internal returns (bool){
+
+        //require(isUserOwnerPlay(user, _idPlay),"you do not have permissions to create cards");
+        
+        uint256 seed = Ramdom.s_requestId();
+
+        //crear nueva semilla 
         uint256 numberCartons = play[_idPlay].maxNumberCartons;
 
         if (numberCartons == 0){
@@ -201,8 +206,9 @@ contract Bingo {
 
         //numbers of cartons
         for(uint i = 0; i < numberCartons ; i++ ){
-
-            uint256 currentIdCarton = currentIdCartons.current();
+            
+           
+            uint256 idCarton = currentIdCartons.current();
 
             // j = 0 --> B
             // j = 1 --> I
@@ -214,12 +220,13 @@ contract Bingo {
                 uint256 min;
                 uint256 max;
                 words wordCarton;
+                uint256[] memory possibleNumber ;
 
                 //index Words B
                 if(j == 0 ){
                     min = 1;
                     max = 15;
-                    wordCarton = words.B;                   
+                    wordCarton = words.B;                                       
                 }
 
                 //index Words I
@@ -250,33 +257,22 @@ contract Bingo {
                     wordCarton = words.O; 
                 }
 
+                possibleNumber = numbersOfBingo[wordCarton];             
+
                 //llena el carton 
-                while(true){
+                //sacar a una funcion?          
 
-                    uint256 ramdonNumber = generateNumberRamdom(min, max);
-
-                    if(numberExists[ramdonNumber] == false ){
-                        
-                        numberExists[ramdonNumber] = true;
-
-                        cartons[currentIdCarton].idCarton = currentIdCarton;
-                        cartons[currentIdCarton].idPlay = _idPlay;
-                        cartons[currentIdCarton].number[wordCarton].push(ramdonNumber);
-                    
-                    }
-
-                    if(cartons[currentIdCarton].number[wordCarton].length < 4){
-                        continue;
-                    }
-                    break;
-                }           
-
-                //resetear los numeros usados
-                for (uint x = 0 ; x <= cartons[currentIdCarton].number[wordCarton].length ; x ++ ){
-                    numberExists[cartons[currentIdCarton].number[wordCarton][x]] = false;
-                }
+                uint256 ramdonIndex = generateNumberRamdom(0, possibleNumber.length, seed);                                   
+                cartons[idCarton].idCarton = idCarton;
+                cartons[idCarton].idPlay = _idPlay;
+                cartons[idCarton].number[wordCarton].push(possibleNumber[ramdonIndex]);           
+                
+                PlayCartons[_idPlay].push(idCarton);
+                delete possibleNumber[ramdonIndex];               
 
             }
+
+            currentIdCartons.increment();
 
         }
 
