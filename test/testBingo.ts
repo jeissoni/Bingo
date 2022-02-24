@@ -39,6 +39,7 @@ describe("Test smart contract Bingo.sol", function () {
     const account1 = await ethers.getSigner("0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a")
 
     const linkAddress : string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
+    const ramdonAddress : string = "0xA9E78D6Fa9D67a8903F8Cad473fA2e3CFc09103b"
 
     const ERC20 = await ethers.getContractFactory("ERC20")
 
@@ -53,7 +54,7 @@ describe("Test smart contract Bingo.sol", function () {
    
     const Bingo = await ethers.getContractFactory("Bingo")
 
-    const BingoDeploy = await Bingo.connect(ownerBingo).deploy(ERC20Deploy.address)
+    const BingoDeploy = await Bingo.connect(ownerBingo).deploy(ERC20Deploy.address, ramdonAddress)
    
 
     return {
@@ -81,24 +82,17 @@ describe("Test smart contract Bingo.sol", function () {
 
     })
 
+    
+
     it ("Create new Play", async()=>{
 
-
-
-      const {ownerBingo, BingoDeploy, account1} = await BingoData()
-
-      const balnace : BigNumber = await ethers.provider.getBalance(account1.address)
-
-      console.log(balnace.toString())
+      const {ownerBingo, BingoDeploy} = await BingoData()
 
       const lastBlockDate : BigNumber = await latest()
-
       const maxNumberCartons : number = 20
       const numberPlayer : number = 20
       const cartonsByPlayer : number = 1
-
       const cartonPrice : BigNumber = BigNumber.from(1).mul(10).pow(8)
-
       const endDate : BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
 
       await BingoDeploy.connect(ownerBingo).createPlay(
