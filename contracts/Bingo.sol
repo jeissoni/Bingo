@@ -3,6 +3,8 @@ pragma solidity ^0.8.0;
 
 import "./struct/strucs.sol";
 import "./utils/Counters.sol";
+import "./utils/String.sol";
+
 import "./token/IERC20.sol";
 
 import "./RandomNumberConsumer.sol";
