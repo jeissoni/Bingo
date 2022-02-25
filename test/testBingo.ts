@@ -5,20 +5,20 @@ import { Provider } from "@ethersproject/abstract-provider";
 
 
 const duration = {
-  seconds: function (val : BigNumber) { return (BigNumber.from(val)); },
-  minutes: function (val : BigNumber) { return val.mul(this.seconds(BigNumber.from(60)))},
-  hours: function (val : BigNumber) { return  val.mul(this.minutes(BigNumber.from(60)))},
-  days: function (val : BigNumber) { return val.mul(this.hours(BigNumber.from(24)))},
-  weeks: function (val : BigNumber) { return val.mul(this.days(BigNumber.from(7)))},
-  years: function (val : BigNumber) { return val.mul(this.days(BigNumber.from(365)))},
+  seconds: function (val: BigNumber) { return (BigNumber.from(val)); },
+  minutes: function (val: BigNumber) { return val.mul(this.seconds(BigNumber.from(60))) },
+  hours: function (val: BigNumber) { return val.mul(this.minutes(BigNumber.from(60))) },
+  days: function (val: BigNumber) { return val.mul(this.hours(BigNumber.from(24))) },
+  weeks: function (val: BigNumber) { return val.mul(this.days(BigNumber.from(7))) },
+  years: function (val: BigNumber) { return val.mul(this.days(BigNumber.from(365))) },
 };
 
 
 
-async function latest () {
-  const blockNumBefore : number = await ethers.provider.getBlockNumber();
+async function latest() {
+  const blockNumBefore: number = await ethers.provider.getBlockNumber();
   const blockBefore = await ethers.provider.getBlock(blockNumBefore);
-  const timestampBefore : BigNumber = BigNumber.from(blockBefore.timestamp);
+  const timestampBefore: BigNumber = BigNumber.from(blockBefore.timestamp);
   return (timestampBefore);
 }
 
@@ -38,8 +38,8 @@ describe("Test smart contract Bingo.sol", function () {
 
     const account1 = await ethers.getSigner("0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a")
 
-    const linkAddress : string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
-    const ramdonAddress : string = "0xA9E78D6Fa9D67a8903F8Cad473fA2e3CFc09103b"
+    const linkAddress: string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
+    const ramdonAddress: string = "0xA9E78D6Fa9D67a8903F8Cad473fA2e3CFc09103b"
 
     const ERC20 = await ethers.getContractFactory("ERC20")
 
@@ -48,14 +48,14 @@ describe("Test smart contract Bingo.sol", function () {
       nameERC20,
       symbolERC20,
       decimals,
-      totalValue      
+      totalValue
     )
 
-   
+
     const Bingo = await ethers.getContractFactory("Bingo")
 
     const BingoDeploy = await Bingo.connect(ownerBingo).deploy(ERC20Deploy.address, ramdonAddress)
-   
+
 
     return {
       ownerBingo,
@@ -66,34 +66,34 @@ describe("Test smart contract Bingo.sol", function () {
       account1,
       linkAddress
     }
-    
- 
+
+
   }
 
-  describe("Bingo Owner", function (){
+  describe("Bingo Owner", function () {
 
-    it("The account that dsiplay is the owner of the contract", async () =>{
+    it("The account that dsiplay is the owner of the contract", async () => {
 
-      const {ownerBingo , BingoDeploy} = await BingoData()
+      const { ownerBingo, BingoDeploy } = await BingoData()
 
-      const isOwner : boolean = await BingoDeploy.isOwner(ownerBingo.address)
+      const isOwner: boolean = await BingoDeploy.isOwner(ownerBingo.address)
 
       expect(isOwner).to.equals(true)
 
     })
 
-    
 
-    it ("Create new Play", async()=>{
 
-      const {ownerBingo, BingoDeploy} = await BingoData()
+    it("Create new Play", async () => {
 
-      const lastBlockDate : BigNumber = await latest()
-      const maxNumberCartons : number = 20
-      const numberPlayer : number = 20
-      const cartonsByPlayer : number = 1
-      const cartonPrice : BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate : BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+      const { ownerBingo, BingoDeploy } = await BingoData()
+
+      const lastBlockDate: BigNumber = await latest()
+      const maxNumberCartons: number = 20
+      const numberPlayer: number = 20
+      const cartonsByPlayer: number = 1
+      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
 
       await BingoDeploy.connect(ownerBingo).createPlay(
         maxNumberCartons,
@@ -103,7 +103,7 @@ describe("Test smart contract Bingo.sol", function () {
         endDate
       )
 
-      const currentIdPlay : BigNumber = await BingoDeploy.getCurrentIdPLay()
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
 
       const getLastPlay = await BingoDeploy.getPlayDetail(currentIdPlay.sub(1))
 
@@ -115,52 +115,52 @@ describe("Test smart contract Bingo.sol", function () {
 
     })
 
-    it("Create all number of Bingo" , async () => {
+    it("Create all number of Bingo", async () => {
 
-      const {ownerBingo, BingoDeploy} = await BingoData()
+      const { ownerBingo, BingoDeploy } = await BingoData()
 
       await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
 
-      for (var i = 0 ; i < 5 ; i++){
+      for (var i = 0; i < 5; i++) {
 
         const numberOfWord = await BingoDeploy.connect(ownerBingo).getNumberOfWord(i)
-        
-        for (var j = 0 ; j < 15 ; j++){
-         
-          let numero : number = j + 1
 
-          if (i === 0){
+        for (var j = 0; j < 15; j++) {
+
+          let numero: number = j + 1
+
+          if (i === 0) {
             expect(numberOfWord[j]).to.equals(BigNumber.from(numero))
           }
-          if (i === 1){
+          if (i === 1) {
             expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 15))
           }
-          if (i === 2){
+          if (i === 2) {
             expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 30))
           }
-          if (i === 3){
+          if (i === 3) {
             expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 45))
           }
-          if (i === 4){
+          if (i === 4) {
             expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 60))
-          }         
-           
+          }
+
         }
-      }      
+      }
 
     })
 
-    it("Create play cartons" , async () => {
+    it("Create play cartons", async () => {
 
-      const {ownerBingo, BingoDeploy, user1} = await BingoData()
+      const { ownerBingo, BingoDeploy, user1 } = await BingoData()
 
       //create new play
-      const lastBlockDate : BigNumber = await latest()
-      const maxNumberCartons : number = 20
-      const numberPlayer : number = 20
-      const cartonsByPlayer : number = 1  
-      const cartonPrice : BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate : BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+      const lastBlockDate: BigNumber = await latest()
+      const maxNumberCartons: number = 20
+      const numberPlayer: number = 20
+      const cartonsByPlayer: number = 1
+      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
 
       await BingoDeploy.connect(user1).createPlay(
         maxNumberCartons,
@@ -170,17 +170,63 @@ describe("Test smart contract Bingo.sol", function () {
         endDate
       )
 
-      const currentIdPlay : BigNumber = await BingoDeploy.getCurrentIdPLay()
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
 
       await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
       //create all cartons
-      await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))     
+      await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
 
       const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
 
       expect(maxNumberCartons).to.equals(cartonsCreated.length)
 
-  })
+    })
+
+    it("impir carton",async () => {
+      const { ownerBingo, BingoDeploy, user1 } = await BingoData()
+
+      //create new play
+      const lastBlockDate: BigNumber = await latest()
+      const maxNumberCartons: number = 20
+      const numberPlayer: number = 20
+      const cartonsByPlayer: number = 1
+      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
+      await BingoDeploy.connect(user1).createPlay(
+        maxNumberCartons,
+        numberPlayer,
+        cartonsByPlayer,
+        cartonPrice,
+        endDate
+      )
+
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+      await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+      //create all cartons
+      await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
+
+      const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
+
+      
+
+
+      // for (let i = 0; i < cartonsCreated.length; i++) {
+      //   console.log("Carton # " + i)
+      //   for(let j = 0 ; j < 5 ; j ++ ){
+          
+      //     const numberWors = await BingoDeploy.getNumersCartons(i,j)
+      //     console.log("letra # " + j)
+          
+      //     console.log(numberWors.toString())
+      //   }
+
+
+        
+      // }
+
+    })
 
   })
 
