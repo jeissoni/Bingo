@@ -236,7 +236,23 @@ contract Bingo {
         );
         require(_createNewCartons(_idPlay), "Could not create game cards");
         return true;
+    function getNumberCarton(uint256 _idPlay, uint256 _idCarton, words _word)
+    external 
+    view 
+    returns(uint256[] memory){
+
+        require(play[_idPlay].idPlay  0, "the play not exists");
+
+        require(PlayCartons[_idPlay][_idCarton] > 0, "the carton no existes in the play");
+
+        require(cartons[_idCarton].idCarton > 0, "the carton no existe");       
+        
+        return cartons[_idCarton].number[_word];
     }
+
+
+
+   
 
     function _createNewCartons(uint256 _idPlay) internal returns (bool) {
         uint256 _seed = Ramdom.s_requestId();
