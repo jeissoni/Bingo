@@ -13,6 +13,7 @@ import "hardhat/console.sol";
 
 contract Bingo {
     IERC20 public USD;
+
     RandomNumberConsumer public Ramdom;
 
     using Counters for Counters.Counter;
@@ -189,38 +190,43 @@ contract Bingo {
         emit CreateNewPlay(msg.sender, _idPlay);
         return true;
     }
-   
 
-     function getSlice(
-        uint256 begin,
-        uint256 end,
-        string memory text)
-        public pure returns (string memory) {
+    
+    function removeIndexArray(uint256[] memory array, uint256 index)
+        internal
+        pure
+        returns(uint256[] memory) {          
 
-        bytes memory a = bytes(text);
-
-        bytes memory b = new bytes(end-begin+1);
-
-        for(uint i=0;i<=end-begin;i++){
-            b[i] = a[i];
+        uint[] memory arrayNew = new uint[](array.length-1);
+        for (uint i = 0; i<arrayNew.length; i++){
+            if(i != index && i<index){
+                arrayNew[i] = array[i];
+            } else {
+                arrayNew[i] = array[i+1];
+            }
         }
-
-        return string(b);    
+        return arrayNew;
     }
 
     function generateNumberRamdom(
+        uint256 _cartonsNumber,
         uint256 _min,
-        uint256 _max,
-        string memory _seed
+        uint256 _max
     ) internal view returns (uint256) {
-        //uint256 seed = Ramdom.s_requestId();
 
-        return
-            (uint256(
-                keccak256(abi.encodePacked(block.timestamp, msg.sender, _seed))
-            ) % (_max - _min + 1)) + 1;
+        uint256 _seed = Ramdom.s_requestId();
 
-        //_seed % (_max - _min + 1) + 1;
+        require(_seed != 0 , "seed cannot be 0");
+
+        uint256 _seedTemp = uint256(
+            keccak256(
+                abi.encodePacked(
+                    _cartonsNumber, _seed
+                    ))) % _max;
+
+        _seedTemp = _seedTemp + _min;            
+
+        return (_seedTemp);
     }
 
     function createNewCartons(uint256 _idPlay) external returns (bool) {
@@ -233,9 +239,7 @@ contract Bingo {
     }
 
     function _createNewCartons(uint256 _idPlay) internal returns (bool) {
-
-        string memory seed = Strings.toString(Ramdom.s_requestId());
-
+        uint256 _seed = Ramdom.s_requestId();
         //crear nueva semilla
         uint256 numberCartons = play[_idPlay].maxNumberCartons;
 
@@ -257,7 +261,6 @@ contract Bingo {
                 uint256 min;
                 uint256 max;
                 words wordCarton;
-                uint256[] memory possibleNumber;
 
                 //index Words B
                 if (j == 0) {
@@ -294,29 +297,29 @@ contract Bingo {
                     wordCarton = words.O;
                 }
 
-                possibleNumber = numbersOfBingo[wordCarton];
-
+                uint256[] memory possibleNumber = numbersOfBingo[wordCarton];
                 cartons[idCarton].idCarton = idCarton;
                 cartons[idCarton].idPlay = _idPlay;
+
                 //llena el carton
                 //sacar a una funcion?
                 for (uint256 x = 0; x < 5; x++) {
-
-                    console.log("length ", possibleNumber.length);
+                    
+                    console.log("# Cartons: " , i);
 
                     uint256 ramdonIndex = generateNumberRamdom(
                         0,
-                        possibleNumber.length,
-                        getSlice(0, idCarton, seed)                    
+                        possibleNumber.length - x,
+                        _seed / (i * x + 1)
                     );
-
-                    console.log("index ", ramdonIndex);
 
                     cartons[idCarton].number[wordCarton].push(
                         possibleNumber[ramdonIndex]
                     );
 
-                    delete possibleNumber[ramdonIndex];
+                    possibleNumber = removeIndexArray(possibleNumber, ramdonIndex);
+                    
+                    console.log(possibleNumber.length);
                 }
             }
 
