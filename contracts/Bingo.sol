@@ -229,13 +229,6 @@ contract Bingo {
         return (_seedTemp);
     }
 
-    function createNewCartons(uint256 _idPlay) external returns (bool) {
-        require(
-            isUserOwnerPlay(msg.sender, _idPlay),
-            "you do not have permissions to create cards"
-        );
-        require(_createNewCartons(_idPlay), "Could not create game cards");
-        return true;
     function getNumberCarton(uint256 _idPlay, uint256 _idCarton, words _word)
     external 
     view 
@@ -255,7 +248,6 @@ contract Bingo {
    
 
     function _createNewCartons(uint256 _idPlay) internal returns (bool) {
-        uint256 _seed = Ramdom.s_requestId();
         //crear nueva semilla
         uint256 numberCartons = play[_idPlay].maxNumberCartons;
 
@@ -319,15 +311,13 @@ contract Bingo {
 
                 //llena el carton
                 //sacar a una funcion?
-                for (uint256 x = 0; x < 5; x++) {
+                for (uint256 x = 0; x < 5; x++) {                    
                     
-                    console.log("# Cartons: " , i);
-
                     uint256 ramdonIndex = generateNumberRamdom(
+                        i,
                         0,
-                        possibleNumber.length - x,
-                        _seed / (i * x + 1)
-                    );
+                        possibleNumber.length                        
+                    );                    
 
                     cartons[idCarton].number[wordCarton].push(
                         possibleNumber[ramdonIndex]
