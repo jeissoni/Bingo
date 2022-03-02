@@ -371,11 +371,131 @@ contract Bingo {
         return true;
     }
 
+
+     function createNewCartons(uint256 _idPlay) external returns (bool) {
+        require(
+            isUserOwnerPlay(msg.sender, _idPlay),
+            "you do not have permissions to create cards"
+        );
+        require(_createNewCartons(_idPlay), "Could not create game cards");
+        return true;
+    }
+
+
+    function _buyCartonsPlay(
+        uint256 _idPlay, 
+        uint256 _cartonsNumber,
+        address _user, 
+        uint256 _valueUSTSent) 
+    internal 
+    returns (bool) {
+
+        for (uint256 i = 0; i < _cartonsNumber; i++) {
+            uint256 idCarton = currentIdCartons.current();
+            PlayCartons[_idPlay].push(idCarton);
+
+            // j = 0 --> B
+            // j = 1 --> I
+            // j = 2 --> N
+            // j = 3 --> G
+            // j = 4 --> O
+            for (uint256 j = 0; j < 5; j++) {
+                uint256 min;
+                uint256 max;
+                words wordCarton;
+
+                //index Words B
+                if (j == 0) {
+                    min = 1;
+                    max = 15;
+                    wordCarton = words.B;
+                }
+
+                //index Words I
+                if (j == 1) {
+                    min = 16;
+                    max = 30;
+                    wordCarton = words.I;
+                }
+
+                //index Words N
+                if (j == 2) {
+                    min = 31;
+                    max = 45;
+                    wordCarton = words.N;
+                }
+
+                //index Words G
+                if (j == 3) {
+                    min = 46;
+                    max = 60;
+                    wordCarton = words.G;
+                }
+
+                //index Words O
+                if (j == 4) {
+                    min = 61;
+                    max = 75;
+                    wordCarton = words.O;
+                }
+
+                uint256[] memory possibleNumber = numbersOfBingo[wordCarton];
+                cartons[idCarton].idCarton = idCarton;
+                cartons[idCarton].idPlay = _idPlay;
+
+                //llena el carton
+                //sacar a una funcion?
+                for (uint256 x = 0; x < 5; x++) {                    
+                    
+                    uint256 ramdonIndex = generateNumberRamdom(
+                        i,
+                        0,
+                        possibleNumber.length                        
+                    );                    
+
+                    cartons[idCarton].number[wordCarton].push(
+                        possibleNumber[ramdonIndex]
+                    );
+
+                    possibleNumber = removeIndexArray(possibleNumber, ramdonIndex);
+                    
+                }
+            }
+
+            currentIdCartons.increment();
+        }
+
+        return true;
+
+    }
+
+
+    function buyCartonsPlay(uint256 _idPlay, uint256 _cartonsToBuy)
+    external
+    returns(bool){
+        
+        require(isPlay(_idPlay), "the id play not exists");     
+        require(play[_idPlay].state == statePlay.INITIATED, "the game is not available");
+
+        require(play[_idPlay.endPlayDate] < block.timestamp, "the endgame date has already happened");
+
+        require(_cartonsToBuy > 0 , "the number of cards to buy must be greater than 0");
+
+       require(play[_idPlay].maxNumberCartons <= _cartonsToBuy, "can not buy that quantity of cartons");
+
+
+        bool isBuyCartons = 
+
+    }
+
     constructor(address usd, address _random) {
         owner[msg.sender] = true;
 
         USD = IERC20(usd);
 
         Ramdom = RandomNumberConsumer(_random);
+
+        currentIdPlay.increment();
+        currentIdCartons.increment();
     }
 }
