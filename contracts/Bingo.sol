@@ -153,6 +153,44 @@ contract Bingo {
         return playReturn;
     }
 
+    function isPlay(uint256 _idPlay)
+    internal
+    view
+    returns(bool){
+        bool exists = false;
+
+        if (_idPlay > 0 &&
+            play[_idPlay].idPlay == _idPlay){
+            exists = true;
+        }
+        return exists;
+    }
+
+    function isCartonPlay(uint256 _idPlay, uint256 _idCarton)
+    internal
+    view
+    returns(bool){
+        bool exists = false;
+
+        if(PlayCartons[_idPlay].length > 0){
+        
+            for (uint256 i = 0; i < PlayCartons[_idPlay].length; i++) {
+                if(PlayCartons[_idPlay][i] == _idCarton){
+                   exists = true; 
+                }
+            }
+        }
+        return exists;
+
+    }
+
+    function getPlayOwnerUser()
+    external
+    view 
+    returns (uint256[] memory){
+        return userOwnerPlay[msg.sender];
+    }
+
     function createPlay(
         uint256 _maxNumberCartons,
         uint256 _numberPlayer,
