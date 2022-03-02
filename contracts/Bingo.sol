@@ -37,13 +37,11 @@ contract Bingo {
         uint256 maxNumberCartons;
         uint256 numberPlayer;
         uint256 cartonsByPlayer;
-        uint256 catonPrice;
+        uint256 cartonPrice;
         uint256 startPlayDate;
-        uint256 endPlayDate;
-        //uint256[] carton;
-        statePlay state;
+        uint256 endPlayDate;        
         address ownerPlay;
-        //mapping(words => uint[4]) winerNumber;
+        statePlay state;
     }
 
     struct cartonsDetail {
