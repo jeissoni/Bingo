@@ -66,6 +66,7 @@ contract Bingo {
 
     mapping(address => bool) private owner;
 
+
     //numeros posibles del bingo
     mapping(words => uint256[]) private numbersOfBingo;
 
@@ -144,6 +145,7 @@ contract Bingo {
     {
         bool playReturn = false;
         if (userOwnerPlay[_account].length > 0) {
+           
             for (uint256 i = 0; i < userOwnerPlay[_account].length; i++) {
                 if (userOwnerPlay[_account][i] == _idPlay) {
                     playReturn = true;
@@ -152,6 +154,7 @@ contract Bingo {
         }
         return playReturn;
     }
+
 
     function isPlay(uint256 _idPlay)
     internal
@@ -210,6 +213,7 @@ contract Bingo {
 
         uint256 _idPlay = currentIdPlay.current();
 
+        play[_idPlay].idPlay = _idPlay;
         play[_idPlay].maxNumberCartons = _maxNumberCartons;
         play[_idPlay].numberPlayer = _numberPlayer;
         play[_idPlay].cartonsByPlayer = _cartonsByPlayer;
@@ -270,17 +274,15 @@ contract Bingo {
     view 
     returns(uint256[] memory){
 
-        require(play[_idPlay].idPlay  0, "the play not exists");
+        require(play[_idPlay].idPlay > 0, "the play not exists");
 
-        require(PlayCartons[_idPlay][_idCarton] > 0, "the carton no existes in the play");
+        require(isCartonPlay(_idPlay, _idCarton), "the carton no existes in the play");
 
-        require(cartons[_idCarton].idCarton > 0, "the carton no existe");       
-        
+        require(cartons[_idCarton].idCarton > 0, "the carton no existe"); 
+
         return cartons[_idCarton].number[_word];
+
     }
-
-
-
    
 
     function _createNewCartons(uint256 _idPlay) internal returns (bool) {
@@ -361,7 +363,6 @@ contract Bingo {
 
                     possibleNumber = removeIndexArray(possibleNumber, ramdonIndex);
                     
-                    console.log(possibleNumber.length);
                 }
             }
 
