@@ -390,21 +390,55 @@ contract Bingo {
     }
 
 
-    function buyCartonsPlay(uint256 _idPlay, uint256 _cartonsToBuy)
+    function buyCartonsPlay(uint256 _idPlay, uint256 _cartonsToBuy, uint256 _amount)
     external
     returns(bool){
         
-        require(isPlay(_idPlay), "the id play not exists");     
-        require(play[_idPlay].state == statePlay.INITIATED, "the game is not available");
+        require(
+            isPlay(_idPlay) && play[_idPlay].state == statePlay.CREATED, 
+            "the id play not exists"
+        );  
+ 
+        require(
+            play[_idPlay].endPlayDate > block.timestamp,
+            "the endgame date has already happened"
+        );
 
-        require(play[_idPlay.endPlayDate] < block.timestamp, "the endgame date has already happened");
+        require(
+            _cartonsToBuy > 0 ,
+            "the number of cards to buy must be greater than 0"
+        );
 
-        require(_cartonsToBuy > 0 , "the number of cards to buy must be greater than 0");
+        require(
+            USD.balanceOf(msg.sender) >= _amount,
+            "Do not have the necessary funds of USD"
+        );      
 
-       require(play[_idPlay].maxNumberCartons <= _cartonsToBuy, "can not buy that quantity of cartons");
+        require(
+            play[_idPlay].cartonPrice * _cartonsToBuy <= _amount, 
+            "you do not send the amount of USDT necessary to make the purchase"
+        );
+
+        //no hay cartones para vender 
+        require(
+            play[_idPlay].cartonsSold < play[_idPlay].maxNumberCartons,
+            "there are no cards to buy"
+        );
+        
+        
+        require(
+            play[_idPlay].cartonsByPlayer >= _cartonsToBuy, 
+            "can not buy that quantity of cartons"
+        );
 
 
-        bool isBuyCartons = 
+        bool isBuyCartons = _buyCartonsPlay(
+            _idPlay,
+            _cartonsToBuy,
+            msg.sender            
+        );
+
+        return isBuyCartons;
 
     }
 
