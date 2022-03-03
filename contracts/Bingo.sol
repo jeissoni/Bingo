@@ -220,17 +220,21 @@ contract Bingo {
         play[_idPlay].maxNumberCartons = _maxNumberCartons;
         play[_idPlay].numberPlayer = _numberPlayer;
         play[_idPlay].cartonsByPlayer = _cartonsByPlayer;
-        play[_idPlay].catonPrice = _cartonPrice;
+        play[_idPlay].cartonPrice = _cartonPrice;
         play[_idPlay].startPlayDate = block.timestamp;
         play[_idPlay].endPlayDate = _endDate;
         play[_idPlay].state = statePlay.CREATED;
         play[_idPlay].ownerPlay = msg.sender;
+        play[_idPlay].amountUSDT = 0;
+        play[_idPlay].cartonsSold = 0;
+        play[_idPlay].ownerPlay = address(0);
 
         userOwnerPlay[msg.sender].push(_idPlay);
 
         currentIdPlay.increment();
 
         emit CreateNewPlay(msg.sender, _idPlay);
+
         return true;
     }
 
