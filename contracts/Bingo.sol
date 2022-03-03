@@ -106,7 +106,7 @@ contract Bingo {
         return Ramdom.s_requestId();
     }
 
-    function createAllNumberOfBingo() external onlyOwner returns (bool) {
+    function createAllNumberOfBingo() private onlyOwner returns (bool) {
         for (uint256 i = 1; i <= 15; i++) {
             numbersOfBingo[words.B].push(i);
             numbersOfBingo[words.I].push(i + 15);
