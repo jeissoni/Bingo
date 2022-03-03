@@ -1,8 +1,14 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
 import { BigNumber } from "ethers"
-import { Provider } from "@ethersproject/abstract-provider";
 
+interface numberCartons {
+  b: BigNumber[];
+  i: BigNumber[];
+  n: BigNumber[];
+  g: BigNumber[];
+  o: BigNumber[];
+};
 
 const duration = {
   seconds: function (val: BigNumber) { return (BigNumber.from(val)); },
@@ -86,7 +92,7 @@ describe("Test smart contract Bingo.sol", function () {
 
     it("Create new Play", async () => {
 
-      const { ownerBingo, BingoDeploy } = await BingoData()
+      const { ownerBingo, BingoDeploy, owenrERC20, ERC20Deploy } = await BingoData()
 
       const lastBlockDate: BigNumber = await latest()
       const maxNumberCartons: number = 20
@@ -103,14 +109,14 @@ describe("Test smart contract Bingo.sol", function () {
         endDate
       )
 
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()      
+      
       const getLastPlay = await BingoDeploy.getPlayDetail(currentIdPlay.sub(1))
 
       expect(getLastPlay.maxNumberCartons).to.equals(maxNumberCartons)
       expect(getLastPlay.numberPlayer).to.equals(numberPlayer)
       expect(getLastPlay.cartonsByPlayer).to.equals(cartonsByPlayer)
-      expect(getLastPlay.catonPrice).to.equals(cartonPrice)
+      expect(getLastPlay.cartonPrice).to.equals(cartonPrice)
       expect(getLastPlay.endPlayDate).to.equals(endDate)
 
     })
@@ -118,8 +124,6 @@ describe("Test smart contract Bingo.sol", function () {
     it("Create all number of Bingo", async () => {
 
       const { ownerBingo, BingoDeploy } = await BingoData()
-
-      await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
 
       for (var i = 0; i < 5; i++) {
 
@@ -452,6 +456,7 @@ describe("Test smart contract Bingo.sol", function () {
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
 
       await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+      
       //create all cartons
       await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
 
@@ -461,10 +466,9 @@ describe("Test smart contract Bingo.sol", function () {
 
     })
 
-    it("impir carton",async () => {
+    it("validar carton",async () => {
       const { ownerBingo, BingoDeploy, user1 } = await BingoData()
 
-      //create new play
       const lastBlockDate: BigNumber = await latest()
       const maxNumberCartons: number = 20
       const numberPlayer: number = 20
@@ -480,33 +484,64 @@ describe("Test smart contract Bingo.sol", function () {
         endDate
       )
 
+
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
 
       await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+      
       //create all cartons
       await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
 
-      const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
+      //const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
 
-      
+      const currentIdCartonCreated : BigNumber = await BingoDeploy.getCurrentIdCartons()
 
+      let numberCartonBingo : numberCartons = {} as any
 
-      // for (let i = 0; i < cartonsCreated.length; i++) {
-      //   console.log("Carton # " + i)
-      //   for(let j = 0 ; j < 5 ; j ++ ){
-          
-      //     const numberWors = await BingoDeploy.getNumersCartons(i,j)
-      //     console.log("letra # " + j)
-          
-      //     console.log(numberWors.toString())
-      //   }
-
-
+      for(var i = 0 ; i < 5 ; i++){
         
-      // }
+        const numberByCarton = await BingoDeploy.getNumberCarton(
+          currentIdPlay.sub(1),
+          currentIdCartonCreated.sub(1),
+          i
+        )     
+
+        switch(i){
+
+          case 0:
+            numberCartonBingo.b = numberByCarton
+            break;
+
+          case 1:
+            numberCartonBingo.i = numberByCarton
+            break;
+
+          case 2:
+            numberCartonBingo.n = numberByCarton
+            break;
+          
+          case 3:
+            numberCartonBingo.g = numberByCarton
+            break;
+          
+          case 4:
+            numberCartonBingo.o = numberByCarton
+            break;  
+
+        }
+        
+      }
+
+      console.log(numberCartonBingo.b.toString())     
+      console.log(numberCartonBingo.i.toString())     
+      console.log(numberCartonBingo.n.toString())     
+      console.log(numberCartonBingo.g.toString())     
+      console.log(numberCartonBingo.o.toString())     
 
     })
-
-  })
+    
+    */    
 
 })
+
+
