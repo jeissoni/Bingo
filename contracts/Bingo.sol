@@ -63,11 +63,13 @@ contract Bingo {
 
     mapping(uint256 => cartonsDetail) private cartons;
 
-    mapping(address => uint256[]) public userPlay;
-
+    //En donde esta comprando el usuario
+    //mapping(address => uint256[]) public userPlay;
     mapping(address => uint256[]) private userCartons;
 
     mapping(address => bool) private owner;
+
+
 
 
     //numeros posibles del bingo
@@ -357,6 +359,7 @@ contract Bingo {
                 uint256[] memory possibleNumber = numbersOfBingo[wordCarton];
                 cartons[idCarton].idCarton = idCarton;
                 cartons[idCarton].idPlay = _idPlay;
+                
 
                 //llena el carton
                 //sacar a una funcion?
@@ -451,5 +454,7 @@ contract Bingo {
 
         currentIdPlay.increment();
         currentIdCartons.increment();
+
+        createAllNumberOfBingo();
     }
 }
