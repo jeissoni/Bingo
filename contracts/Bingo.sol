@@ -35,11 +35,13 @@ contract Bingo {
     struct playDetail {
         uint256 idPlay;
         uint256 maxNumberCartons;
+        uint256 cartonsSold;
         uint256 numberPlayer;
         uint256 cartonsByPlayer;
         uint256 cartonPrice;
         uint256 startPlayDate;
-        uint256 endPlayDate;        
+        uint256 endPlayDate;  
+        uint256 amountUSDT;      
         address ownerPlay;
         statePlay state;
     }
@@ -48,7 +50,8 @@ contract Bingo {
         uint256 idCarton;
         uint256 idPlay;
         mapping(words => uint256[]) number;
-    }
+        address userOwner;        
+    }    
 
     Counters.Counter private currentIdPlay;
     Counters.Counter private currentIdCartons;
