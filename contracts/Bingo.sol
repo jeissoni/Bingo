@@ -374,10 +374,15 @@ contract Bingo {
 
                     possibleNumber = removeIndexArray(possibleNumber, ramdonIndex);
                     
-                }
-            }
+                }              
 
+            }
+            
+            cartons[idCarton].userOwner = _user;
+            userCartons[_user].push(idCarton);
+            play[_idPlay].cartonsSold ++;
             currentIdCartons.increment();
+
         }
 
         return true;
