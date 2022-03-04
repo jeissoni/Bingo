@@ -301,11 +301,13 @@ contract Bingo {
     internal 
     returns (bool) {        
 
+
         uint256 valueCartonsBuy = play[_idPlay].cartonPrice * _cartonsNumber;
 
-        USD.transferFrom(_user, address(this), valueCartonsBuy);  
+        require(USD.transferFrom(_user, address(this), valueCartonsBuy));  
 
         play[_idPlay].amountUSDT += valueCartonsBuy;
+
 
         for (uint256 i = 0; i < _cartonsNumber; i++) {
             uint256 idCarton = currentIdCartons.current();
@@ -379,13 +381,14 @@ contract Bingo {
                     
                 }              
 
-            }
-            
+            }           
+           
+
             cartons[idCarton].userOwner = _user;
             userCartons[_user].push(idCarton);
             play[_idPlay].cartonsSold ++;
             currentIdCartons.increment();
-
+            
         }
 
         return true;
@@ -393,7 +396,11 @@ contract Bingo {
     }
 
 
-    function buyCartonsPlay(uint256 _idPlay, uint256 _cartonsToBuy, uint256 _amount)
+    function buyCartonsPlay(
+        uint256 _idPlay,
+        uint256 _cartonsToBuy,
+        uint256 _amount
+        )
     external
     returns(bool){
         
@@ -415,24 +422,22 @@ contract Bingo {
         require(
             USD.balanceOf(msg.sender) >= _amount,
             "Do not have the necessary funds of USD"
-        );      
+        );        
 
         require(
             play[_idPlay].cartonPrice * _cartonsToBuy <= _amount, 
             "you do not send the amount of USDT necessary to make the purchase"
         );
 
-        //no hay cartones para vender 
-        require(
-            play[_idPlay].cartonsSold < play[_idPlay].maxNumberCartons,
-            "there are no cards to buy"
-        );
-        
-        
         require(
             play[_idPlay].cartonsByPlayer >= _cartonsToBuy, 
             "can not buy that quantity of cartons"
         );
+      
+        require(
+            play[_idPlay].maxNumberCartons > play[_idPlay].cartonsSold,
+            "there are no cards to buy"
+        );       
 
 
         bool isBuyCartons = _buyCartonsPlay(
@@ -446,6 +451,7 @@ contract Bingo {
     }
 
     constructor(address usd, address _random) {
+        
         owner[msg.sender] = true;
 
         USD = IERC20(usd);
@@ -453,6 +459,7 @@ contract Bingo {
         Ramdom = RandomNumberConsumer(_random);
 
         currentIdPlay.increment();
+
         currentIdCartons.increment();
 
         createAllNumberOfBingo();
