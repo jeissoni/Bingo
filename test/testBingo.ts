@@ -31,7 +31,7 @@ async function latest() {
 
 
 
-describe("Test smart contract Bingo.sol", function () {
+describe("1 - Test smart contract Bingo.sol", function () {
 
   const BingoData = async () => {
 
@@ -76,9 +76,9 @@ describe("Test smart contract Bingo.sol", function () {
 
   }
 
-  describe("Bingo Owner", function () {
+  describe("2 - Bingo Owner", function () {
 
-    it("The account that dsiplay is the owner of the contract", async () => {
+    it("1 - The account that dsiplay is the owner of the contract", async () => {
 
       const { ownerBingo, BingoDeploy } = await BingoData()
 
@@ -90,7 +90,7 @@ describe("Test smart contract Bingo.sol", function () {
 
 
 
-    it("Create new Play", async () => {
+    it("2 - Create new Play", async () => {
 
       const { ownerBingo, BingoDeploy, owenrERC20, ERC20Deploy } = await BingoData()
 
@@ -109,8 +109,8 @@ describe("Test smart contract Bingo.sol", function () {
         endDate
       )
 
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()      
-      
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+
       const getLastPlay = await BingoDeploy.getPlayDetail(currentIdPlay.sub(1))
 
       expect(getLastPlay.maxNumberCartons).to.equals(maxNumberCartons)
@@ -121,7 +121,7 @@ describe("Test smart contract Bingo.sol", function () {
 
     })
 
-    it("Create all number of Bingo", async () => {
+    it("3 - Create all number of Bingo", async () => {
 
       const { ownerBingo, BingoDeploy } = await BingoData()
 
@@ -158,32 +158,32 @@ describe("Test smart contract Bingo.sol", function () {
 
   describe("Bingo User", function () {
 
-    it("Not being able to buy if the game does not exist",async () => {
-      const {         
+    it("1 - Not being able to buy if the game does not exist", async () => {
+      const {
         BingoDeploy,
-        user1 
+        user1
       } = await BingoData()
 
-        await expect(BingoDeploy.connect(user1).buyCartonsPlay(
+      await expect(BingoDeploy.connect(user1).buyCartonsPlay(
         5,
         2,
         BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("the id play not exists")        
+      )).to.be.revertedWith("the id play not exists")
     })
 
-    it("Not being able to buy if the end date of the game has already passed",async () => {
-      const {         
+    it("2 - Not being able to buy if the end date of the game has already passed", async () => {
+      const {
         BingoDeploy,
-        user1 
-      } = await BingoData() 
-      
+        user1
+      } = await BingoData()
+
       //create new play
       const lastBlockDate: BigNumber = await latest()
       const maxNumberCartons: number = 20
       const numberPlayer: number = 20
       const cartonsByPlayer: number = 1
       const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))      
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
 
       await BingoDeploy.connect(user1).createPlay(
         maxNumberCartons,
@@ -191,11 +191,11 @@ describe("Test smart contract Bingo.sol", function () {
         cartonsByPlayer,
         cartonPrice,
         endDate
-      )     
-      
-      await ethers.provider.send("evm_increaseTime", 
-      //[(60 * 60 * 24 * 7) + 1] // una semana + 1 segundo
-      [60 * 60 * 4] // 4 horas
+      )
+
+      await ethers.provider.send("evm_increaseTime",
+        //[(60 * 60 * 24 * 7) + 1] // una semana + 1 segundo
+        [60 * 60 * 4] // 4 horas
       )
 
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
@@ -204,215 +204,216 @@ describe("Test smart contract Bingo.sol", function () {
         currentIdPlay.sub(1),
         2,
         BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("the endgame date has already happened")        
+      )).to.be.revertedWith("the endgame date has already happened")
     })
 
 
-    it("The number of cards to buy must be greater than 0", async () => {
-      const { 
+    it("3 - The number of cards to buy must be greater than 0", async () => {
+      const {
         ownerBingo,
         BingoDeploy,
         owenrERC20,
         ERC20Deploy,
-        user1 
-      } = await BingoData() 
-      
+        user1
+      } = await BingoData()
+
       //create new play
       const lastBlockDate: BigNumber = await latest()
       const maxNumberCartons: number = 20
       const numberPlayer: number = 20
       const cartonsByPlayer: number = 1
       const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))      
-  
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
       await BingoDeploy.connect(user1).createPlay(
         maxNumberCartons,
         numberPlayer,
         cartonsByPlayer,
         cartonPrice,
         endDate
-      )     
-     
+      )
+
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-  
+
       await expect(BingoDeploy.connect(user1).buyCartonsPlay(
         currentIdPlay.sub(1),
         0,
         BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("the number of cards to buy must be greater than 0")        
+      )).to.be.revertedWith("the number of cards to buy must be greater than 0")
     })
 
-
-   
-
-    it("The number of cards to buy must be less than or equal to the maximum allowed",
-    async () => {
-
-      const { 
-        BingoDeploy,
-        ERC20Deploy,
-        owenrERC20,
-        user1 
-      } = await BingoData() 
-      
-      //create new play
-      const lastBlockDate: BigNumber = await latest()
-      const maxNumberCartons: number = 20
-      const numberPlayer: number = 20
-      const cartonsByPlayer: number = 1
-      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))      
-  
-      await BingoDeploy.connect(user1).createPlay(
-        maxNumberCartons,
-        numberPlayer,
-        cartonsByPlayer,
-        cartonPrice,
-        endDate
-      )     
-     
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-
-       
-      await ERC20Deploy.connect(owenrERC20).transfer(
-        user1.address,
-        cartonPrice.mul(2)                
-      )
-  
-      await expect(BingoDeploy.connect(user1).buyCartonsPlay(
-        currentIdPlay.sub(1),
-        maxNumberCartons + 1,
-        BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("can not buy that quantity of cartons")    
-
-    })
-
-
-    it("Do not have the necessary funds of USD", async () => {
-      const {         
-        BingoDeploy,
-        user1 
-      } = await BingoData() 
-      
-      //create new play
-      const lastBlockDate: BigNumber = await latest()
-      const maxNumberCartons: number = 20
-      const numberPlayer: number = 20
-      const cartonsByPlayer: number = 1
-      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))      
-  
-      await BingoDeploy.connect(user1).createPlay(
-        maxNumberCartons,
-        numberPlayer,
-        cartonsByPlayer,
-        cartonPrice,
-        endDate
-      )     
-     
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-
-      
-      // await ERC20Deploy.connect(owenrERC20).transfer(
-      //   user1.address,
-      //   cartonPrice.mul(2)                
-      // )
-
-      // await ERC20Deploy.connect(user1).approve(
-      //   BingoDeploy.address, 
-      //   cartonPrice.mul(2)         
-      // )
-  
-      await expect(BingoDeploy.connect(user1).buyCartonsPlay(
-        currentIdPlay.sub(1),
-        1,
-        BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("Do not have the necessary funds of USD")    
-    })
-
-
-    it("You do not send the amount of USDT necessary to make the purchase", async () => {
-      const {         
+    it("4 - Do not have the necessary funds of USD", async () => {
+      const {
         BingoDeploy,
         user1,
         ERC20Deploy,
         owenrERC20
-      } = await BingoData() 
-      
+      } = await BingoData()
+
       //create new play
       const lastBlockDate: BigNumber = await latest()
       const maxNumberCartons: number = 20
       const numberPlayer: number = 20
       const cartonsByPlayer: number = 1
       const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))      
-  
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
       await BingoDeploy.connect(user1).createPlay(
         maxNumberCartons,
         numberPlayer,
         cartonsByPlayer,
         cartonPrice,
         endDate
-      )     
-     
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-
-      
-      await ERC20Deploy.connect(owenrERC20).transfer(
-        user1.address,
-        cartonPrice.mul(2)                
       )
 
-      // await ERC20Deploy.connect(user1).approve(
-      //   BingoDeploy.address, 
-      //   cartonPrice.mul(2)         
-      // )
-  
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+
+      await ERC20Deploy.connect(owenrERC20).transfer(
+        user1.address,
+        cartonPrice
+      )
+
       await expect(BingoDeploy.connect(user1).buyCartonsPlay(
         currentIdPlay.sub(1),
         2,
-        BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("You do not send the amount of USDT necessary to make the purchase")    
+        cartonPrice.mul(2)
+      )).to.be.revertedWith("Do not have the necessary funds of USD")
+    })
+
+    it("5 - You do not send the amount of USD necessary to make the purchase", async () => {
+      const {
+        BingoDeploy,
+        user1,
+        ERC20Deploy,
+        owenrERC20
+      } = await BingoData()
+
+      //create new play
+      const lastBlockDate: BigNumber = await latest()
+      const maxNumberCartons: number = 20
+      const numberPlayer: number = 20
+      const cartonsByPlayer: number = 1
+      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
+      await BingoDeploy.connect(user1).createPlay(
+        maxNumberCartons,
+        numberPlayer,
+        cartonsByPlayer,
+        cartonPrice,
+        endDate
+      )
+
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+
+      await ERC20Deploy.connect(owenrERC20).transfer(
+        user1.address,
+        cartonPrice.mul(3)
+      )
+
+      await expect(BingoDeploy.connect(user1).buyCartonsPlay(
+        currentIdPlay.sub(1),
+        2,
+        cartonPrice
+      )).to.be.revertedWith("you do not send the amount of USDT necessary to make the purchase")
     })
 
 
 
+    it("6 - The number of cards to buy must be less than or equal to the maximum allowed",
+      async () => {
 
+        const {
+          BingoDeploy,
+          ERC20Deploy,
+          owenrERC20,
+          user1
+        } = await BingoData()
+
+        //create new play
+        const lastBlockDate: BigNumber = await latest()
+        const maxNumberCartons: number = 20
+        const numberPlayer: number = 20
+        const cartonsByPlayer: number = 1
+        const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+        const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
+        await BingoDeploy.connect(user1).createPlay(
+          maxNumberCartons,
+          numberPlayer,
+          cartonsByPlayer,
+          cartonPrice,
+          endDate
+        )
+
+        const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+        await ERC20Deploy.connect(owenrERC20).transfer(
+          user1.address,
+          cartonPrice.mul(4)
+        )
+
+        await expect(BingoDeploy.connect(user1).buyCartonsPlay(
+          currentIdPlay.sub(1),
+          2,
+          cartonPrice.mul(4)
+        )).to.be.revertedWith("can not buy that quantity of cartons")
+
+      })
 
     //pendiente 
-    it("There are no cards to buy", async () => {
-      
-      const { 
+    it("7 - There are no cards to buy", async () => {
+
+      const {
         ownerBingo,
         BingoDeploy,
         owenrERC20,
         ERC20Deploy,
-        user1 
-      } = await BingoData() 
-      
+        user1
+      } = await BingoData()
+
       //create new play
       const lastBlockDate: BigNumber = await latest()
       const maxNumberCartons: number = 20
       const numberPlayer: number = 20
-      const cartonsByPlayer: number = 1
+      const cartonsByPlayer: number = 20
       const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))      
-  
+      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
       await BingoDeploy.connect(user1).createPlay(
         maxNumberCartons,
         numberPlayer,
         cartonsByPlayer,
         cartonPrice,
         endDate
-      )     
-     
+      )
+
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-  
+
+      await ERC20Deploy.connect(owenrERC20).transfer(
+        user1.address,
+        cartonPrice.mul(21)
+      )
+
+      await ERC20Deploy.connect(user1).approve(
+        BingoDeploy.address,
+        cartonPrice.mul(21)
+      )
+
+      await BingoDeploy.connect(user1).buyCartonsPlay(
+        currentIdPlay.sub(1),
+        20,
+        cartonPrice.mul(20)
+      )
+
+
       await expect(BingoDeploy.connect(user1).buyCartonsPlay(
         currentIdPlay.sub(1),
-        maxNumberCartons - 1,
-        BigNumber.from(1).mul(10).pow(8)
-        )).to.be.revertedWith("can not buy that quantity of cartons")    
+        1,
+        cartonPrice.mul(1)
+      )).to.be.revertedWith("there are no cards to buy")
 
     })
 
@@ -425,122 +426,122 @@ describe("Test smart contract Bingo.sol", function () {
 
 
 
+
+
+
+
+
+
+  /*
+
+  it("Create play cartons", async () => {
+
+    const { ownerBingo, BingoDeploy, user1 } = await BingoData()
+
+    //create new play
+    const lastBlockDate: BigNumber = await latest()
+    const maxNumberCartons: number = 20
+    const numberPlayer: number = 20
+    const cartonsByPlayer: number = 1
+    const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+    const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
+    await BingoDeploy.connect(user1).createPlay(
+      maxNumberCartons,
+      numberPlayer,
+      cartonsByPlayer,
+      cartonPrice,
+      endDate
+    )
+
+    const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+
+    await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
     
+    //create all cartons
+    await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
+
+    const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
+
+    expect(maxNumberCartons).to.equals(cartonsCreated.length)
+
+  })
+
+  it("validar carton",async () => {
+    const { ownerBingo, BingoDeploy, user1 } = await BingoData()
+
+    const lastBlockDate: BigNumber = await latest()
+    const maxNumberCartons: number = 20
+    const numberPlayer: number = 20
+    const cartonsByPlayer: number = 1
+    const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
+    const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
+
+    await BingoDeploy.connect(user1).createPlay(
+      maxNumberCartons,
+      numberPlayer,
+      cartonsByPlayer,
+      cartonPrice,
+      endDate
+    )
 
 
+    const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
 
+    await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+    
+    //create all cartons
+    await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
 
+    //const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
 
-    /*
+    const currentIdCartonCreated : BigNumber = await BingoDeploy.getCurrentIdCartons()
 
-    it("Create play cartons", async () => {
+    let numberCartonBingo : numberCartons = {} as any
 
-      const { ownerBingo, BingoDeploy, user1 } = await BingoData()
-
-      //create new play
-      const lastBlockDate: BigNumber = await latest()
-      const maxNumberCartons: number = 20
-      const numberPlayer: number = 20
-      const cartonsByPlayer: number = 1
-      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
-
-      await BingoDeploy.connect(user1).createPlay(
-        maxNumberCartons,
-        numberPlayer,
-        cartonsByPlayer,
-        cartonPrice,
-        endDate
-      )
-
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-
-      await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
+    for(var i = 0 ; i < 5 ; i++){
       
-      //create all cartons
-      await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
+      const numberByCarton = await BingoDeploy.getNumberCarton(
+        currentIdPlay.sub(1),
+        currentIdCartonCreated.sub(1),
+        i
+      )     
 
-      const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
+      switch(i){
 
-      expect(maxNumberCartons).to.equals(cartonsCreated.length)
+        case 0:
+          numberCartonBingo.b = numberByCarton
+          break;
 
-    })
+        case 1:
+          numberCartonBingo.i = numberByCarton
+          break;
 
-    it("validar carton",async () => {
-      const { ownerBingo, BingoDeploy, user1 } = await BingoData()
-
-      const lastBlockDate: BigNumber = await latest()
-      const maxNumberCartons: number = 20
-      const numberPlayer: number = 20
-      const cartonsByPlayer: number = 1
-      const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
-      const endDate: BigNumber = lastBlockDate.add(duration.hours(BigNumber.from(1)))
-
-      await BingoDeploy.connect(user1).createPlay(
-        maxNumberCartons,
-        numberPlayer,
-        cartonsByPlayer,
-        cartonPrice,
-        endDate
-      )
-
-
-      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-
-      await BingoDeploy.connect(ownerBingo).createAllNumberOfBingo()
-      
-      //create all cartons
-      await BingoDeploy.connect(user1).createNewCartons(currentIdPlay.sub(1))
-
-      //const cartonsCreated = await BingoDeploy.getIdCartonsPlay(currentIdPlay.sub(1))
-
-      const currentIdCartonCreated : BigNumber = await BingoDeploy.getCurrentIdCartons()
-
-      let numberCartonBingo : numberCartons = {} as any
-
-      for(var i = 0 ; i < 5 ; i++){
+        case 2:
+          numberCartonBingo.n = numberByCarton
+          break;
         
-        const numberByCarton = await BingoDeploy.getNumberCarton(
-          currentIdPlay.sub(1),
-          currentIdCartonCreated.sub(1),
-          i
-        )     
-
-        switch(i){
-
-          case 0:
-            numberCartonBingo.b = numberByCarton
-            break;
-
-          case 1:
-            numberCartonBingo.i = numberByCarton
-            break;
-
-          case 2:
-            numberCartonBingo.n = numberByCarton
-            break;
-          
-          case 3:
-            numberCartonBingo.g = numberByCarton
-            break;
-          
-          case 4:
-            numberCartonBingo.o = numberByCarton
-            break;  
-
-        }
+        case 3:
+          numberCartonBingo.g = numberByCarton
+          break;
         
+        case 4:
+          numberCartonBingo.o = numberByCarton
+          break;  
+
       }
+      
+    }
 
-      console.log(numberCartonBingo.b.toString())     
-      console.log(numberCartonBingo.i.toString())     
-      console.log(numberCartonBingo.n.toString())     
-      console.log(numberCartonBingo.g.toString())     
-      console.log(numberCartonBingo.o.toString())     
+    console.log(numberCartonBingo.b.toString())     
+    console.log(numberCartonBingo.i.toString())     
+    console.log(numberCartonBingo.n.toString())     
+    console.log(numberCartonBingo.g.toString())     
+    console.log(numberCartonBingo.o.toString())     
 
-    })
-    
-    */    
+  })
+  
+  */
 
 })
 
