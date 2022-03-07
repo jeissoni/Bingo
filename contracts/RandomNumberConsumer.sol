@@ -47,11 +47,12 @@ contract RandomNumberConsumer is VRFConsumerBaseV2 {
     uint256[] public s_randomWords;
     uint256 public s_requestId;
     address s_owner;
+    mapping(address => bool) private isOwner;
 
     constructor(uint64 subscriptionId) VRFConsumerBaseV2(vrfCoordinator) {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         LINKTOKEN = LinkTokenInterface(link);
-        s_owner = msg.sender;
+        isOwner[msg.sender] = true;
         s_subscriptionId = subscriptionId;
     }
 
@@ -74,8 +75,16 @@ contract RandomNumberConsumer is VRFConsumerBaseV2 {
         );
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == s_owner);
+    function addNewOwner(address _newOwner)
+    external
+    onlyOwner
+    returns (bool){
+       isOwner[_newOwner] = true;
+       return true;
+    }
+
+    modifier onlyOwner() {        
+        require(isOwner[msg.sender] == true);
         _;
     }
 }
