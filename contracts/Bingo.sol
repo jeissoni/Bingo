@@ -159,6 +159,20 @@ contract Bingo {
         }
         return playReturn;
     }
+    function changeStatePlayToInitiated(uint256 _idPlay)
+    external
+    returns(bool){
+
+        require(isUserOwnerPlay(msg.sender, _idPlay),
+            "you don't own the game");
+
+        require(play[_idPlay].endPlayDate > block.timestamp, 
+            "the end date of has already happened");
+
+        play[_idPlay].state = statePlay.INITIATED;
+
+        return true;
+    }
 
 
     function isPlay(uint256 _idPlay)
