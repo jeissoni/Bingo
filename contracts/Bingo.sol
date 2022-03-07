@@ -41,7 +41,9 @@ contract Bingo {
         uint256 cartonPrice;
         uint256 startPlayDate;
         uint256 endPlayDate;  
-        uint256 amountUSDT;      
+        uint256 amountUSDT;
+        uint256[] totalNumbers;
+        uint256[] numbersPlayed;      
         address ownerPlay;
         statePlay state;
     }
@@ -80,7 +82,8 @@ contract Bingo {
 
     //modifier
     modifier onlyOwner() {
-        require(owner[msg.sender] == true, "Exclusive function of the Owner");
+        require(owner[msg.sender] == true, 
+            "Exclusive function of the Owner");
         _;
     }
 
@@ -143,6 +146,8 @@ contract Bingo {
         return cartons[_idCartons].number[_word];
     }
 
+
+   
     function isUserOwnerPlay(address _account, uint256 _idPlay)
         internal
         view
@@ -202,6 +207,7 @@ contract Bingo {
                 }
             }
         }
+
         return exists;
 
     }
@@ -276,19 +282,20 @@ contract Bingo {
     }
 
     function generateNumberRamdom(
-        uint256 _cartonsNumber,
+        uint256 _idPlayOrCarton,
         uint256 _min,
-        uint256 _max
-    ) internal view returns (uint256) {
+        uint256 _max,
+        uint256 _seed
+    ) internal pure returns (uint256) {
 
-        uint256 _seed = Ramdom.s_requestId();
+        //uint256 _seed = Ramdom.s_requestId();
 
         require(_seed != 0 , "seed cannot be 0");
 
         uint256 _seedTemp = uint256(
             keccak256(
                 abi.encodePacked(
-                    _cartonsNumber, _seed
+                    _idPlayOrCarton, _seed
                     ))) % _max;
 
         _seedTemp = _seedTemp + _min;            
@@ -317,15 +324,19 @@ contract Bingo {
         address _user
         ) 
     internal 
-    returns (bool) {        
+    returns (bool) {     
 
+
+        //llamar para generar nueva cemilla
+        uint256 _seed = Ramdom.s_requestId();
+
+        require(_seed != 0 , "seed cannot be 0");
 
         uint256 valueCartonsBuy = play[_idPlay].cartonPrice * _cartonsNumber;
 
         require(USD.transferFrom(_user, address(this), valueCartonsBuy));  
 
         play[_idPlay].amountUSDT += valueCartonsBuy;
-
 
         for (uint256 i = 0; i < _cartonsNumber; i++) {
             uint256 idCarton = currentIdCartons.current();
@@ -388,7 +399,8 @@ contract Bingo {
                     uint256 ramdonIndex = generateNumberRamdom(
                         i,
                         0,
-                        possibleNumber.length                        
+                        possibleNumber.length,
+                        _seed                        
                     );                    
 
                     cartons[idCarton].number[wordCarton].push(
@@ -465,6 +477,69 @@ contract Bingo {
         );
 
         return isBuyCartons;
+
+    }
+
+
+    function _generateWinningNumbers(uint256 _idPlay, uint256 _seed)
+    internal
+    returns (bool){
+
+        uint256 randomNumer = generateNumberRamdom(
+            _idPlay,
+            0,
+            play[_idPlay].totalNumbers.length,
+            _seed
+        );
+
+        play[_idPlay].numbersPlayed.push(
+            play[_idPlay].totalNumbers[randomNumer]
+        );       
+
+        play[_idPlay].totalNumbers = removeIndexArray(
+            play[_idPlay].totalNumbers,
+            randomNumer
+        );
+
+        return true;
+
+    }
+
+    function generateWinningNumbers(uint256 _idPlay)
+    external 
+    returns (bool){
+
+
+        require(isPlay(_idPlay),"the number is not a play");
+
+        require(isUserOwnerPlay(msg.sender, _idPlay),
+            "you don't own the game");
+
+        require(
+            play[_idPlay].state == statePlay.INITIATED, 
+            "the play is not INITIATED"
+        );  
+ 
+
+        console.log(play[_idPlay].endPlayDate);
+
+        console.log(block.timestamp);
+
+        require(
+            play[_idPlay].endPlayDate > block.timestamp,
+            "the endgame date has already happened"
+        );
+
+        //**********/
+        //debemos genera una nueva clave 
+        //Ramdom.requestRandomWords();        
+
+        require(Ramdom.s_requestId() != 0 , "seed cannot be 0");
+
+        require (_generateWinningNumbers(_idPlay,  Ramdom.s_requestId()), 
+        "An error has occurred");          
+
+        return true;      
 
     }
 
