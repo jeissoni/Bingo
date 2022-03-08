@@ -1,6 +1,9 @@
 import { ethers } from "hardhat"
+const hre = require("hardhat");
 import { expect } from "chai"
 import { BigNumber } from "ethers"
+import { abi } from "../artifacts/contracts/RandomNumberConsumer.sol/RandomNumberConsumer.json" 
+
 
 interface numberCartons {
   b: BigNumber[];
@@ -30,53 +33,81 @@ async function latest() {
 
 
 
+const BingoData = async () => {
 
-describe("1 - Test smart contract Bingo.sol", function () {
-  
+  const nameERC20: string = "USDT"
+  const symbolERC20: string = "USDT"
+  const decimals = 8
+  const totalValue = BigNumber.from(100).mul(10).pow(8)
 
-  const BingoData = async () => {
+  const [ownerBingo, owenrERC20, user1, user2, user3, user4] = await ethers.getSigners()
 
-    const nameERC20: string = "USDT"
-    const symbolERC20: string = "USDT"
-    const decimals = 8
-    const totalValue = BigNumber.from(100).mul(10).pow(8)
+  // await hre.network.provider.request({
+  //   method: "hardhat_impersonateAccount",
+  //   params: [0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a],
+  // });
 
-    const [ownerBingo, owenrERC20, user1, user2, user3, user4] = await ethers.getSigners()
+  const account1 = await ethers.getSigner("0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a")
 
-    const account1 = await ethers.getSigner("0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a")
+  const linkAddress: string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
+  //const ramdonAddress: string = "0xA9E78D6Fa9D67a8903F8Cad473fA2e3CFc09103b"
+  const ramdonAddress: string = "0xF502DCCd41962d62B2f49D5342e4219812a64392"
 
-    const linkAddress: string = "0x01BE23585060835E02B77ef475b0Cc51aA1e0709";
-    const ramdonAddress: string = "0xA9E78D6Fa9D67a8903F8Cad473fA2e3CFc09103b"
-    //const ramdonAddress: string = "0xF502DCCd41962d62B2f49D5342e4219812a64392"
-
-    const ERC20 = await ethers.getContractFactory("ERC20")
-
-
-    const ERC20Deploy = await ERC20.connect(owenrERC20).deploy(
-      nameERC20,
-      symbolERC20,
-      decimals,
-      totalValue
-    )
+  const ERC20 = await ethers.getContractFactory("ERC20")
 
 
-    const Bingo = await ethers.getContractFactory("Bingo")
+  const ERC20Deploy = await ERC20.connect(owenrERC20).deploy(
+    nameERC20,
+    symbolERC20,
+    decimals,
+    totalValue
+  )
 
-    const BingoDeploy = await Bingo.connect(ownerBingo).deploy(ERC20Deploy.address, ramdonAddress)
 
-    return {
-      ownerBingo,
-      owenrERC20,
-      user1, user2, user3, user4,
-      ERC20Deploy,
-      BingoDeploy,
-      account1,
-      linkAddress
-    }
+  const Bingo = await ethers.getContractFactory("Bingo")
 
+  const BingoDeploy = await Bingo.connect(ownerBingo).deploy(ERC20Deploy.address, ramdonAddress)
+
+  return {
+    ownerBingo,
+    owenrERC20,
+    user1, user2, user3, user4,
+    ERC20Deploy,
+    BingoDeploy,
+    account1,
+    linkAddress
   }
 
-   
+}
+
+const addOwner = async (newAddress : string) =>{  
+
+  const addressContract : string = '0xF502DCCd41962d62B2f49D5342e4219812a64392'
+
+  //console.log("contract", newAddress)
+
+  await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: ["0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a"],
+  });  
+
+  await ethers.provider.send('hardhat_impersonateAccount', ['0x2d4bb9a783583875f8b0b86cbcad09ce87523497']);
+
+  const account1 = await ethers.getSigner("0x9A8D3f1D52a8018D4f01f04DB8845C8a58Cc6d4a")
+
+  var contrato  = await ethers.getContractAt(abi, addressContract);
+
+  await contrato.connect(account1).addNewOwner(newAddress)
+
+  //const { ownerBingo, BingoDeploy } = await BingoData() 
+
+  //console.log("ts " + await BingoDeploy.Ramdom())
+
+}
+
+
+
+describe("1 - Test smart contract Bingo.sol", function () {   
 
   describe("Bingo Owner", function () {
 
@@ -431,6 +462,9 @@ describe("1 - Test smart contract Bingo.sol", function () {
         ERC20Deploy,
         user1
       } = await BingoData()
+
+      await addOwner(BingoDeploy.address)
+
   
       //create new play
       const lastBlockDate: BigNumber = await latest()
@@ -451,8 +485,11 @@ describe("1 - Test smart contract Bingo.sol", function () {
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
 
       await BingoDeploy.connect(user1).changeStatePlayToInitiated(currentIdPlay.sub(1))
-
+            
       await BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
+
+       
+      
 
     })
 
