@@ -485,6 +485,7 @@ contract Bingo {
     internal
     returns (bool){
 
+        
         uint256 randomNumer = generateNumberRamdom(
             _idPlay,
             0,
@@ -509,7 +510,6 @@ contract Bingo {
     external 
     returns (bool){
 
-
         require(isPlay(_idPlay),"the number is not a play");
 
         require(isUserOwnerPlay(msg.sender, _idPlay),
@@ -518,12 +518,7 @@ contract Bingo {
         require(
             play[_idPlay].state == statePlay.INITIATED, 
             "the play is not INITIATED"
-        );  
- 
-
-        console.log(play[_idPlay].endPlayDate);
-
-        console.log(block.timestamp);
+        );       
 
         require(
             play[_idPlay].endPlayDate > block.timestamp,
@@ -532,8 +527,8 @@ contract Bingo {
 
         //**********/
         //debemos genera una nueva clave 
-        //Ramdom.requestRandomWords();        
-
+        Ramdom.requestRandomWords();    
+        
         require(Ramdom.s_requestId() != 0 , "seed cannot be 0");
 
         require (_generateWinningNumbers(_idPlay,  Ramdom.s_requestId()), 
