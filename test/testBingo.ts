@@ -457,14 +457,11 @@ describe("1 - Test smart contract Bingo.sol", function () {
     it("1 - generate number", async () =>{
       
       const {        
-        BingoDeploy,
-        owenrERC20,
-        ERC20Deploy,
+        BingoDeploy,     
         user1
       } = await BingoData()
 
       await addOwner(BingoDeploy.address)
-
   
       //create new play
       const lastBlockDate: BigNumber = await latest()
@@ -489,6 +486,7 @@ describe("1 - Test smart contract Bingo.sol", function () {
       await BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
 
        
+      expect(numero.length).to.equals(1)
       
 
     })
