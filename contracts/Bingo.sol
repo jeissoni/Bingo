@@ -256,10 +256,9 @@ contract Bingo {
         play[_idPlay].ownerPlay = msg.sender;
         play[_idPlay].amountUSDT = 0;
         play[_idPlay].cartonsSold = 0;
-        play[_idPlay].ownerPlay = address(0);
-
+        play[_idPlay].numbersPlayed = new uint256[](74);
         for (uint i = 1 ; i < 76 ; ++i){
-            play[_idPlay].totalNumbers.push(i);
+            play[_idPlay].totalNumbers.push(i);       
         }
 
         userOwnerPlay[msg.sender].push(_idPlay);
