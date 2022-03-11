@@ -293,19 +293,24 @@ contract Bingo {
         uint256 _min,
         uint256 _max,
         uint256 _seed
-    ) internal pure returns (uint256) {
-
-        //uint256 _seed = Ramdom.s_requestId();
+    ) internal view returns (uint256) {       
 
         require(_seed != 0 , "seed cannot be 0");
+
+        // uint256 _seedTemp = uint256(
+        //     keccak256(
+        //         abi.encodePacked(
+        //             _idPlayOrCarton, _seed
+        //             ))) % _max;
 
         uint256 _seedTemp = uint256(
             keccak256(
                 abi.encodePacked(
-                    _idPlayOrCarton, _seed
-                    ))) % _max;
+                    block.difficulty,
+                    _idPlayOrCarton, 
+                    _seed))) % _max;
 
-        _seedTemp = _seedTemp + _min;            
+        _seedTemp = _seedTemp + _min;  
 
         return (_seedTemp);
     }
