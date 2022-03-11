@@ -146,6 +146,13 @@ contract Bingo {
         return cartons[_idCartons].number[_word];
     }
 
+    function getNumbersPlayedByPlay(uint256 _idPlay)
+    external
+    view
+    returns (uint256[] memory){
+        return play[_idPlay].numbersPlayed;
+    }
+
 
    
     function isUserOwnerPlay(address _account, uint256 _idPlay)
