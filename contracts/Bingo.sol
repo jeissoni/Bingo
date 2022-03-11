@@ -496,26 +496,29 @@ contract Bingo {
 
     function _generateWinningNumbers(uint256 _idPlay, uint256 _seed)
     internal
-    returns (bool){
-
+    returns (uint256){
         
-        uint256 randomNumer = generateNumberRamdom(
+        uint256 randomIndex = generateNumberRamdom(
             _idPlay,
             0,
             play[_idPlay].totalNumbers.length,
             _seed
         );
+        
+        uint256 numberRamdon = play[_idPlay].totalNumbers[randomIndex];
+       
+        play[_idPlay].numbersPlayed[0] = numberRamdon;
 
-        play[_idPlay].numbersPlayed.push(
-            play[_idPlay].totalNumbers[randomNumer]
-        );       
+        // play[_idPlay].numbersPlayed.push(
+        //     numberRamdon
+        // );               
 
         play[_idPlay].totalNumbers = removeIndexArray(
             play[_idPlay].totalNumbers,
-            randomNumer
+            randomIndex
         );
 
-        return true;
+        return numberRamdon;
 
     }
 
@@ -567,5 +570,6 @@ contract Bingo {
         currentIdCartons.increment();
 
         createAllNumberOfBingo();
+
     }
 }
