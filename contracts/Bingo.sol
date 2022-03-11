@@ -80,6 +80,8 @@ contract Bingo {
     //events
     event CreateNewPlay(address owner, uint256 idPlay);
 
+    event GenerateWinningNumbers(uint256 idPlay, uint256 winningNumbers, uint256 date);
+
     //modifier
     modifier onlyOwner() {
         require(owner[msg.sender] == true, 
@@ -536,14 +538,17 @@ contract Bingo {
             "the endgame date has already happened"
         );
 
+       
         //**********/
         //debemos genera una nueva clave 
         Ramdom.requestRandomWords();    
+
         
         require(Ramdom.s_requestId() != 0 , "seed cannot be 0");
 
-        require (_generateWinningNumbers(_idPlay,  Ramdom.s_requestId()), 
-        "An error has occurred");          
+        uint256 numberWinning = _generateWinningNumbers(_idPlay,  Ramdom.s_requestId());        
+
+        emit GenerateWinningNumbers(_idPlay, numberWinning, block.timestamp);   
 
         return true;      
 
