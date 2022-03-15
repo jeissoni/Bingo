@@ -557,6 +557,59 @@ contract Bingo {
 
     }
 
+    function isfullCarton (uint256 _idPlay, uint256 _idCarton)
+    public
+    view
+    returns (bool){
+
+        uint256[] memory numberCarton = getNumersCartons(_idCarton);
+
+        uint256[] memory numberPlayed = getNumbersPlayedByPlay(_idPlay);
+
+        uint256 isWin = 0; 
+
+        for(uint i = 0 ; i < numberCarton.length ; i++ ){
+
+            for(uint j = 0 ; j < numberPlayed.length ; j++){
+
+                if (numberCarton[i] == numberPlayed[j]){
+                    isWin++;
+                }
+            }
+        }
+
+        if ( isWin == 25){
+            return true;
+        }          
+
+        return false;
+
+    }
+
+    function claimPrize(uint256 _idPlay, uint256 _idCarton)
+    external
+    returns (bool){
+
+        require(
+            isPlay(_idPlay) && play[_idPlay].state == statePlay.FINALIZED, 
+            "the id play not exists"
+        );  
+
+        require(
+            play[_idPlay].endPlayDate < block.timestamp,
+            "game close date has not occurred"
+        );
+
+        require();
+
+        require(isfullCarton(_idPlay, _idCarton), "the carton is not a winer");
+
+        USD.approve(address(this), play[_idPlay].amountUSDT);
+        USD.transferFrom(address(this), cartons[_idCarton].userOwner, play[_idPlay].amountUSDT);     
+
+        return true;
+    }
+
     constructor(address usd, address _random) {
         
         owner[msg.sender] = true;
