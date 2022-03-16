@@ -170,35 +170,14 @@ describe("1 - Test smart contract Bingo.sol", function () {
 
     it("3 - Create all number of Bingo", async () => {
 
-      const { ownerBingo, BingoDeploy } = await BingoData()
+      const { ownerBingo, BingoDeploy } = await BingoData()      
 
-      for (var i = 0; i < 5; i++) {
+      const numberOfWord = await BingoDeploy.connect(ownerBingo).getNumberOfWord()        
 
-        const numberOfWord = await BingoDeploy.connect(ownerBingo).getNumberOfWord(i)
-
-        for (var j = 0; j < 15; j++) {
-
-          let numero: number = j + 1
-
-          if (i === 0) {
-            expect(numberOfWord[j]).to.equals(BigNumber.from(numero))
-          }
-          if (i === 1) {
-            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 15))
-          }
-          if (i === 2) {
-            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 30))
-          }
-          if (i === 3) {
-            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 45))
-          }
-          if (i === 4) {
-            expect(numberOfWord[j]).to.equals(BigNumber.from(numero + 60))
-          }
-
-        }
-      }
-
+      for ( let i : number = 1 ; i <= 75 ; i ++){
+        expect(numberOfWord[i-1]).to.equals(i)
+      }  
+      
     })
   })
 
@@ -423,6 +402,8 @@ describe("1 - Test smart contract Bingo.sol", function () {
       
       const cartonPrice: BigNumber = BigNumber.from(1).mul(10).pow(8)
 
+      await addOwner(BingoDeploy.address)
+
       //create new play
       
       await createNewPlay(
@@ -465,6 +446,11 @@ describe("1 - Test smart contract Bingo.sol", function () {
 
 
   describe("strat play", function () {
+
+    //set timeOut de todas las pruebas del describe
+    
+    this.timeout(50000);
+
     
     it("1 - generate number", async () =>{
       
@@ -492,14 +478,12 @@ describe("1 - Test smart contract Bingo.sol", function () {
 
       const numero  = await BingoDeploy.getNumbersPlayedByPlay(currentIdPlay.sub(1))
 
-      console.log("numero generado :" + numero)
-
       expect(numero.length).to.equals(1)      
 
     })
 
     it("2 - generate all number", async () => {
-      
+          
       const {        
         BingoDeploy,     
         user1
@@ -520,16 +504,86 @@ describe("1 - Test smart contract Bingo.sol", function () {
       
       await BingoDeploy.connect(user1).changeStatePlayToInitiated(currentIdPlay.sub(1))
 
+
+
       for(let i = 0 ; i < 75 ; i++){
 
-        BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
+        await BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
 
-      }      
+      }         
+
+      const getNumbersPlay : [BigNumber] = await BingoDeploy.getNumbersPlayedByPlay(currentIdPlay.sub(1))
+    
+      expect(getNumbersPlay.length).to.equals(75)
+     
+    })
+
+    it("3 - is full carton", async () =>{
+
+      const {        
+        BingoDeploy,
+        ERC20Deploy,
+        owenrERC20,     
+        user1,
+        user2
+      } = await BingoData()
+
+      await addOwner(BingoDeploy.address)
+
+      const cartonPriceNumber : number = 1 
+
+      const cartonPrice: BigNumber = BigNumber.from(cartonPriceNumber).mul(10).pow(8)
+
+      await createNewPlay(
+        BingoDeploy,
+        user1,
+        20, // total Carton
+        20, // number player
+        20, // cartons by player
+        cartonPriceNumber //price cartons in dolars
+      )
       
-      //const detailPlay = await BingoDeploy.getPlayDetail(currentIdPlay.sub(1))
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
       
-      //console.log(detailPlay)
-      //console.log(detailPlay["numbersPlayed"].toString())
+      console.log(currentIdPlay.toString())
+      
+
+
+      await ERC20Deploy.connect(owenrERC20).transfer(
+        user2.address,
+        cartonPrice.mul(20)
+      )
+
+      await ERC20Deploy.connect(user2).approve(
+        BingoDeploy.address,
+        cartonPrice.mul(20)
+      )
+      
+      console.log(1)
+      
+      await BingoDeploy.connect(user2).buyCartonsPlay(
+        currentIdPlay.sub(1),
+        20,
+        cartonPrice.mul(20)
+      )
+
+    
+
+      await BingoDeploy.connect(user1).changeStatePlayToInitiated(currentIdPlay.sub(1))
+
+
+      for(let i = 0 ; i < 75 ; i++){
+
+        await BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
+
+      }
+
+      const isFull : boolean = await  BingoDeploy.isfullCarton(currentIdPlay.sub(1), 1)
+
+      console.log(isFull)
+
+
+
     })
 
   })
