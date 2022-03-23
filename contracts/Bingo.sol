@@ -86,6 +86,13 @@ contract Bingo {
         uint256 date
     );
 
+    event ClaimPrize(
+        uint256 idPlay,
+        uint idCarton,
+        address winer,
+        uint256 date
+    );
+
     //modifier
     modifier onlyOwner() {
         require(owner[msg.sender] == true, "Exclusive function of the Owner");
@@ -168,11 +175,11 @@ contract Bingo {
     function getAllNumersCartons(uint256 _idCarton)
         public
         view
-        returns (uint256[] memory)
+        returns (uint256[25] memory)
     {
         require(cartons[_idCarton].idCarton > 0, "the carton no existe");
 
-        uint256[] memory totalNumber;
+        uint256[25] memory totalNumber;
 
         uint256[] memory arrayWordB = getNumberCartonsByWord(
             _idCarton,
@@ -196,21 +203,23 @@ contract Bingo {
         );
 
         for (uint256 i = 0; i < 25; i++) {
-            if (i >= 0 && i < 5) {
-                totalNumber[i] = arrayWordB[i];
+
+            if (i >= 0 && i < 5) {                
+                totalNumber[i] = arrayWordB[i];               
             }
-            if (i >= 5 && i < 10) {
-                totalNumber[i] = arrayWordI[i];
+            if (i >= 5 && i < 10) {                
+                totalNumber[i] = arrayWordI[i - 5];
             }
             if (i >= 10 && i < 15) {
-                totalNumber[i] = arrayWordN[i];
+                totalNumber[i] = arrayWordN[i - 10];
             }
             if (i >= 15 && i < 20) {
-                totalNumber[i] = arrayWordG[i];
+                totalNumber[i] = arrayWordG[i - 15];
             }
             if (i >= 20 && i < 25) {
-                totalNumber[i] = arrayWordO[i];
+                totalNumber[i] = arrayWordO[i - 20];
             }
+
         }
 
         return totalNumber;
@@ -595,19 +604,20 @@ contract Bingo {
         view
         returns (bool)
     {
-        uint256[] memory numberCarton = getAllNumersCartons(_idCarton);
+        uint256[25] memory numberCarton = getAllNumersCartons(_idCarton);
 
-        console.log(numberCarton.length);
+        //console.log(numberCarton.length);
 
         uint256[] memory numberPlayed = getNumbersPlayedByPlay(_idPlay);
 
-        console.log(numberPlayed.length);
+        //console.log(numberPlayed.length);
 
         uint256 isWin = 0;
 
         for (uint256 i = 0; i < numberCarton.length; i++) {
 
             for (uint256 j = 0; j < numberPlayed.length; j++) {
+
                 if (numberCarton[i] == numberPlayed[j]) {
                     isWin++;
                 }
@@ -627,7 +637,7 @@ contract Bingo {
     {
      
         require(
-            isPlay(_idPlay) && play[_idPlay].state == statePlay.FINALIZED,
+            isPlay(_idPlay),
             "the id play not exists"
         );
 
@@ -636,6 +646,10 @@ contract Bingo {
             "game close date has not occurred"
         );
 
+        require(
+            cartons[_idCarton].userOwner == msg.sender,
+            "he is not the owner of the carton"
+        );
 
         require(isfullCarton(_idPlay, _idCarton), "the carton is not a winer");
 
@@ -645,6 +659,13 @@ contract Bingo {
             address(this),
             cartons[_idCarton].userOwner,
             play[_idPlay].amountUSDT
+        );
+
+        emit ClaimPrize(
+            _idPlay,
+            _idCarton,
+            msg.sender,
+            block.timestamp
         );
 
         return true;
