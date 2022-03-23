@@ -545,7 +545,7 @@ describe("1 - Test smart contract Bingo.sol", function () {
       
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
       
-      console.log(currentIdPlay.toString())
+      //console.log(currentIdPlay.toString())
       
 
 
@@ -559,7 +559,7 @@ describe("1 - Test smart contract Bingo.sol", function () {
         cartonPrice.mul(20)
       )
       
-      console.log(1)
+      //console.log(1)
       
       await BingoDeploy.connect(user2).buyCartonsPlay(
         currentIdPlay.sub(1),
@@ -572,16 +572,23 @@ describe("1 - Test smart contract Bingo.sol", function () {
       await BingoDeploy.connect(user1).changeStatePlayToInitiated(currentIdPlay.sub(1))
 
 
-      for(let i = 0 ; i < 75 ; i++){
+      for(let i = 0 ; i < 70 ; i++){
 
         await BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
 
       }
 
-      const isFull : boolean = await  BingoDeploy.isfullCarton(currentIdPlay.sub(1), 1)
 
-      console.log(isFull)
+      await ethers.provider.send("evm_increaseTime",
+      //[(60 * 60 * 24 * 7) + 1] // una semana + 1 segundo
+        [60 * 60 * 4] // 4 horas
+      )
 
+      await BingoDeploy.connect(user2).claimPrize(1 , 1)
+
+      const balanceAfter : BigNumber = await ERC20Deploy.balanceOf(user2.address)
+
+      expect(balanceAfter).to.equals(cartonPrice.mul(20))
 
 
     })
