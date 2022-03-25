@@ -518,7 +518,7 @@ describe("1 - Test smart contract Bingo.sol", function () {
      
     })
 
-    it("3 - is full carton", async () =>{
+    it("3 - fails to generate the winning number 76", async () =>{
 
       const {        
         BingoDeploy,
@@ -544,11 +544,7 @@ describe("1 - Test smart contract Bingo.sol", function () {
       )
       
       const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
-      
-      //console.log(currentIdPlay.toString())
-      
-
-
+            
       await ERC20Deploy.connect(owenrERC20).transfer(
         user2.address,
         cartonPrice.mul(20)
@@ -558,19 +554,72 @@ describe("1 - Test smart contract Bingo.sol", function () {
         BingoDeploy.address,
         cartonPrice.mul(20)
       )
-      
-      //console.log(1)
-      
+    
       await BingoDeploy.connect(user2).buyCartonsPlay(
         currentIdPlay.sub(1),
         20,
         cartonPrice.mul(20)
       )
 
-    
-
       await BingoDeploy.connect(user1).changeStatePlayToInitiated(currentIdPlay.sub(1))
 
+      for(let i = 0 ; i < 75 ; i++){
+
+        await BingoDeploy.connect(user1).generateWinningNumbers(currentIdPlay.sub(1))
+
+      }
+
+      await expect(BingoDeploy.connect(user1).generateWinningNumbers(
+        currentIdPlay.sub(1)       
+      )).to.be.revertedWith("All the numbers for this game will be generated")
+
+
+    })
+
+    it("4 - is full carton", async () =>{
+
+      const {        
+        BingoDeploy,
+        ERC20Deploy,
+        owenrERC20,     
+        user1,
+        user2
+      } = await BingoData()
+
+      await addOwner(BingoDeploy.address)
+
+      const cartonPriceNumber : number = 1 
+
+      const cartonPrice: BigNumber = BigNumber.from(cartonPriceNumber).mul(10).pow(8)
+
+      await createNewPlay(
+        BingoDeploy,
+        user1,
+        20, // total Carton
+        20, // number player
+        20, // cartons by player
+        cartonPriceNumber //price cartons in dolars
+      )
+      
+      const currentIdPlay: BigNumber = await BingoDeploy.getCurrentIdPLay()
+            
+      await ERC20Deploy.connect(owenrERC20).transfer(
+        user2.address,
+        cartonPrice.mul(20)
+      )
+
+      await ERC20Deploy.connect(user2).approve(
+        BingoDeploy.address,
+        cartonPrice.mul(20)
+      )
+    
+      await BingoDeploy.connect(user2).buyCartonsPlay(
+        currentIdPlay.sub(1),
+        20,
+        cartonPrice.mul(20)
+      )
+
+      await BingoDeploy.connect(user1).changeStatePlayToInitiated(currentIdPlay.sub(1))
 
       for(let i = 0 ; i < 70 ; i++){
 
@@ -578,13 +627,18 @@ describe("1 - Test smart contract Bingo.sol", function () {
 
       }
 
-
       await ethers.provider.send("evm_increaseTime",
       //[(60 * 60 * 24 * 7) + 1] // una semana + 1 segundo
         [60 * 60 * 4] // 4 horas
       )
 
-      await BingoDeploy.connect(user2).claimPrize(1 , 1)
+      // for (let i = 1 ; i <= 20 ; i ++){
+
+      //   console.log( i + " " + await BingoDeploy.isfullCarton(1,i) )
+
+      // }
+
+      await BingoDeploy.connect(user2).claimPrize(1 , 8)
 
       const balanceAfter : BigNumber = await ERC20Deploy.balanceOf(user2.address)
 
