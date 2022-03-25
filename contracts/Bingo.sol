@@ -1,9 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 
-pragma solidity ^0.8.0;
+pragma solidity =0.8.7;
 pragma abicoder v2;
 
-import "./struct/strucs.sol";
 import "./utils/Counters.sol";
 import "./utils/String.sol";
 
@@ -58,17 +57,17 @@ contract Bingo {
     }
 
     Counters.Counter private currentIdPlay;
+
     Counters.Counter private currentIdCartons;
 
     mapping(uint256 => playDetail) private play;
+
     mapping(uint256 => uint256[]) private PlayCartons;
-    mapping(uint256 => uint256[]) private playCartonWins;
+
     mapping(address => uint256[]) private userOwnerPlay;
 
     mapping(uint256 => cartonsDetail) private cartons;
 
-    //En donde esta comprando el usuario
-    //mapping(address => uint256[]) public userPlay;
     mapping(address => uint256[]) private userCartons;
 
     mapping(address => bool) private owner;
@@ -78,7 +77,7 @@ contract Bingo {
     mapping(words => uint256[]) private numbersOfBingoByWord;
 
     //events
-    event CreateNewPlay(address owner, uint256 idPlay);
+    event CreateNewPlay(address owner, uint256 idPlay, uint256 date);
 
     event GenerateWinningNumbers(
         uint256 idPlay,
@@ -90,6 +89,19 @@ contract Bingo {
         uint256 idPlay,
         uint idCarton,
         address winer,
+        uint256 date
+    );
+
+    event ChangeStatePlayToInitiated(
+        uint256 idPlay,
+        address owner,
+        uint256 date
+    );
+
+    event BuyCartonsPlay(
+        uint256 idPlay,
+        uint256 idCarton,
+        address owner,
         uint256 date
     );
 
@@ -125,10 +137,7 @@ contract Bingo {
 
     function createAllNumberOfBingo() private onlyOwner returns (bool) {
         for (uint256 i = 1; i <= 75; i++) {
-            
-            //Todos los numero 
-            //***************/
-            //??? creo que no es necesario
+         
             numbersOfBingo.push(i);
 
             //Numeros por letra
@@ -203,11 +212,10 @@ contract Bingo {
         );
 
         for (uint256 i = 0; i < 25; i++) {
-
-            if (i >= 0 && i < 5) {                
-                totalNumber[i] = arrayWordB[i];               
+            if (i >= 0 && i < 5) {
+                totalNumber[i] = arrayWordB[i];
             }
-            if (i >= 5 && i < 10) {                
+            if (i >= 5 && i < 10) {
                 totalNumber[i] = arrayWordI[i - 5];
             }
             if (i >= 10 && i < 15) {
@@ -219,7 +227,6 @@ contract Bingo {
             if (i >= 20 && i < 25) {
                 totalNumber[i] = arrayWordO[i - 20];
             }
-
         }
 
         return totalNumber;
@@ -261,6 +268,24 @@ contract Bingo {
         );
 
         play[_idPlay].state = statePlay.INITIATED;
+
+        return true;
+    }
+
+    function changeStatePlayToFinalied(uint256 _idPlay)
+        external
+        returns (bool)
+    {
+        require(isUserOwnerPlay(msg.sender, _idPlay), "you don't own the game");
+
+        require(
+            play[_idPlay].endPlayDate > block.timestamp,
+            "the end date of has already happened"
+        );
+
+        play[_idPlay].state = statePlay.FINALIZED;
+
+        emit ChangeStatePlayToInitiated(_idPlay, msg.sender, block.timestamp);
 
         return true;
     }
@@ -335,7 +360,7 @@ contract Bingo {
 
         currentIdPlay.increment();
 
-        emit CreateNewPlay(msg.sender, _idPlay);
+        emit CreateNewPlay(msg.sender, _idPlay, block.timestamp);
 
         return true;
     }
@@ -362,12 +387,6 @@ contract Bingo {
         uint256 _max,
         uint256 _seed
     ) internal view returns (uint256) {
-
-        // console.log("play: ",_idPlayOrCarton);
-        // console.log("min: ",_min);
-        // console.log("max: ",_max);
-        // console.log("seed: ",_seed);
-
         require(_seed != 0, "seed cannot be 0");
 
         uint256 _seedTemp = uint256(
@@ -383,18 +402,15 @@ contract Bingo {
 
     function _buyCartonsPlay(
         uint256 _idPlay,
-        uint256 _cartonsNumber,        
-        uint256 _amount,
+        uint256 _cartonsNumber,
         address _user
     ) internal returns (bool) {
+        //llamar para generar nueva cemilla
+        Ramdom.requestRandomWords();
 
-        //llamar para generar nueva cemilla        
+        uint256 _seed = Ramdom.s_requestId();
 
-        Ramdom.requestRandomWords();       
-        
-        uint256 _seed = Ramdom.s_requestId();        
-        
-        require(_seed != 0, "seed cannot be 0");       
+        require(_seed != 0, "seed cannot be 0");
 
         uint256 valueCartonsBuy = play[_idPlay].cartonPrice * _cartonsNumber;
 
@@ -402,17 +418,15 @@ contract Bingo {
 
         USD.transferFrom(_user, address(this), valueCartonsBuy);
 
-        play[_idPlay].amountUSDT += valueCartonsBuy; 
+        play[_idPlay].amountUSDT += valueCartonsBuy;
 
         for (uint256 i = 0; i < _cartonsNumber; i++) {
-
-
             uint256 idCarton = currentIdCartons.current();
-            
+
             PlayCartons[_idPlay].push(idCarton);
             userCartons[_user].push(idCarton);
             cartons[idCarton].userOwner = _user;
-            
+
             play[_idPlay].cartonsSold++;
             cartons[idCarton].idCarton = idCarton;
             cartons[idCarton].idPlay = _idPlay;
@@ -463,13 +477,13 @@ contract Bingo {
                     wordCarton = words.O;
                 }
 
-                uint256[] memory possibleNumber = numbersOfBingoByWord[wordCarton];
-
+                uint256[] memory possibleNumber = numbersOfBingoByWord[
+                    wordCarton
+                ];
 
                 //FILAS
                 //sacar a una funcion?
                 for (uint256 x = 0; x < 5; x++) {
-
                     uint256 ramdonIndex = generateNumberRamdom(
                         i, //
                         0, // min
@@ -488,7 +502,8 @@ contract Bingo {
                 }
             }
 
-           
+            emit BuyCartonsPlay(_idPlay, idCarton, _user, block.timestamp);
+
             currentIdCartons.increment();
         }
 
@@ -499,8 +514,7 @@ contract Bingo {
         uint256 _idPlay,
         uint256 _cartonsToBuy,
         uint256 _amount
-    ) external returns (bool) {     
-        
+    ) external returns (bool) {
         require(
             isPlay(_idPlay) && play[_idPlay].state == statePlay.CREATED,
             "the id play not exists"
@@ -536,8 +550,11 @@ contract Bingo {
             "there are no cards to buy"
         );
 
-
-        bool isBuyCartons = _buyCartonsPlay(_idPlay, _cartonsToBuy,_amount, msg.sender);
+        bool isBuyCartons = _buyCartonsPlay(
+            _idPlay,
+            _cartonsToBuy,
+            msg.sender
+        );
 
         return isBuyCartons;
     }
@@ -555,8 +572,6 @@ contract Bingo {
 
         uint256 numberRamdon = play[_idPlay].totalNumbers[randomIndex];
 
-        //play[_idPlay].numbersPlayed[0] = numberRamdon;
-
         play[_idPlay].numbersPlayed.push(numberRamdon);
 
         play[_idPlay].totalNumbers = removeIndexArray(
@@ -568,7 +583,6 @@ contract Bingo {
     }
 
     function generateWinningNumbers(uint256 _idPlay) external returns (bool) {
-
         require(isPlay(_idPlay), "the number is not a play");
 
         require(isUserOwnerPlay(msg.sender, _idPlay), "you don't own the game");
@@ -576,6 +590,11 @@ contract Bingo {
         require(
             play[_idPlay].state == statePlay.INITIATED,
             "the play is not INITIATED"
+        );
+
+        require(
+            play[_idPlay].numbersPlayed.length != 75,
+            "All the numbers for this game will be generated"
         );
 
         require(
@@ -606,18 +625,12 @@ contract Bingo {
     {
         uint256[25] memory numberCarton = getAllNumersCartons(_idCarton);
 
-        //console.log(numberCarton.length);
-
         uint256[] memory numberPlayed = getNumbersPlayedByPlay(_idPlay);
-
-        //console.log(numberPlayed.length);
 
         uint256 isWin = 0;
 
         for (uint256 i = 0; i < numberCarton.length; i++) {
-
             for (uint256 j = 0; j < numberPlayed.length; j++) {
-
                 if (numberCarton[i] == numberPlayed[j]) {
                     isWin++;
                 }
@@ -635,11 +648,7 @@ contract Bingo {
         external
         returns (bool)
     {
-     
-        require(
-            isPlay(_idPlay),
-            "the id play not exists"
-        );
+        require(isPlay(_idPlay), "the id play not exists");
 
         require(
             play[_idPlay].endPlayDate < block.timestamp,
@@ -661,12 +670,7 @@ contract Bingo {
             play[_idPlay].amountUSDT
         );
 
-        emit ClaimPrize(
-            _idPlay,
-            _idCarton,
-            msg.sender,
-            block.timestamp
-        );
+        emit ClaimPrize(_idPlay, _idCarton, msg.sender, block.timestamp);
 
         return true;
     }
