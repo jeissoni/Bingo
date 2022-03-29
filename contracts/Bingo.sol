@@ -352,9 +352,11 @@ contract Bingo {
         play[_idPlay].amountUSDT = 0;
         play[_idPlay].cartonsSold = 0;
 
-        for (uint256 i = 1; i < 76; ++i) {
-            play[_idPlay].totalNumbers.push(i);
-        }
+        // for (uint256 i = 1; i < 76; ++i) {
+        //     play[_idPlay].totalNumbers.push(i);
+        // }
+
+        play[_idPlay].totalNumbers = numbersOfBingo;
 
         userOwnerPlay[msg.sender].push(_idPlay);
 
@@ -512,9 +514,12 @@ contract Bingo {
 
     function buyCartonsPlay(
         uint256 _idPlay,
-        uint256 _cartonsToBuy,
-        uint256 _amount
+        uint256 _cartonsToBuy
     ) external returns (bool) {
+
+        
+        uint256 _amount = play[_idPlay].cartonPrice * _cartonsToBuy;         
+
         require(
             isPlay(_idPlay) && play[_idPlay].state == statePlay.CREATED,
             "the id play not exists"
@@ -535,10 +540,10 @@ contract Bingo {
             "Do not have the necessary funds of USD"
         );
 
-        require(
-            _amount >= play[_idPlay].cartonPrice * _cartonsToBuy,
-            "you do not send the amount of USDT necessary to make the purchase"
-        );
+        // require(
+        //     _amount >= play[_idPlay].cartonPrice * _cartonsToBuy,
+        //     "you do not send the amount of USDT necessary to make the purchase"
+        // );
 
         require(
             play[_idPlay].cartonsByPlayer >= _cartonsToBuy,
