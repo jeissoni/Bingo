@@ -124,6 +124,12 @@ contract Bingo {
     }
 
     function getPlayDetail(uint256 _idPLay)
+    function getCartonsByUser(address _user)
+    external
+    view 
+    returns( uint256[] memory){
+        return userCartons[_user];
+    }
         external
         view
         returns (playDetail memory)
