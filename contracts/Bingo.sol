@@ -13,6 +13,7 @@ import "./RandomNumberConsumer.sol";
 import "hardhat/console.sol";
 
 contract Bingo {
+
     IERC20 public USD;
 
     RandomNumberConsumer public Ramdom;
@@ -123,18 +124,19 @@ contract Bingo {
         return currentIdCartons.current();
     }
 
-    function getPlayDetail(uint256 _idPLay)
     function getCartonsByUser(address _user)
     external
     view 
     returns( uint256[] memory){
         return userCartons[_user];
     }
+
+    function getPlayDetail(uint256 _idPlay)
         external
         view
         returns (playDetail memory)
     {
-        return play[_idPLay];
+        return play[_idPlay];
     }
 
     function getRamdonNumber() external view returns (uint256) {
@@ -167,9 +169,9 @@ contract Bingo {
         return true;
     }
 
-    function getNumberOfWord() external view returns (uint256[] memory) {
-        return numbersOfBingo;
-    }
+    // function getNumberOfWord() external view returns (uint256[] memory) {
+    //     return numbersOfBingo;
+    // }
 
     function getIdCartonsPlay(uint256 _idPlay)
         external
@@ -323,8 +325,8 @@ contract Bingo {
         return exists;
     }
 
-    function getPlayOwnerUser() external view returns (uint256[] memory) {
-        return userOwnerPlay[msg.sender];
+    function getPlayOwnerUser(address _user) external view returns (uint256[] memory) {
+        return userOwnerPlay[_user];
     }
 
     function createPlay(
@@ -357,10 +359,6 @@ contract Bingo {
         play[_idPlay].ownerPlay = msg.sender;
         play[_idPlay].amountUSDT = 0;
         play[_idPlay].cartonsSold = 0;
-
-        // for (uint256 i = 1; i < 76; ++i) {
-        //     play[_idPlay].totalNumbers.push(i);
-        // }
 
         play[_idPlay].totalNumbers = numbersOfBingo;
 
@@ -429,6 +427,7 @@ contract Bingo {
         play[_idPlay].amountUSDT += valueCartonsBuy;
 
         for (uint256 i = 0; i < _cartonsNumber; i++) {
+            
             uint256 idCarton = currentIdCartons.current();
 
             PlayCartons[_idPlay].push(idCarton);
@@ -700,3 +699,5 @@ contract Bingo {
         createAllNumberOfBingo();
     }
 }
+
+
